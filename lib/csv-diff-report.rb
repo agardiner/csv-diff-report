@@ -1,15 +1,115 @@
 require 'csv-diff'
+require 'color-console'
+require 'pathname'
+require 'csv-diff-report/excel'
+require 'csv-diff-report/html'
 
 
+# Defines a class for generating diff reports using CSVDiff.
+#
+# A diff report may contain multiple file diffs, and can be output as either an
+# XLSX spreadsheet document, or an HTML file.
 class CSVDiffReport
 
+    include Excel
+    include Html
+
+
+    # Instantiate a new diff report object.
     def initialize
         @diffs = []
     end
 
 
+    # Add a CSVDiff object to this report.
+    def <<(diff)
+        if diff.is_a?(CSVDiff)
+            @diffs << diff
+        else
+            raise ArgumentError, "Only CSVDiff objects can be added to a CSVDiffReport"
+        end
+    end
+
+
+    # Add a diff to the diff report.
+    #
+    # @param options [Hash] Options to be passed to the diff process.
     def diff(left, right, options = {})
+        left = Pathname.new(left)
+        right = Pathname.new(right)
+        if left.file? && right.file?
+            diff_files(left, right, options)
+        elsif left.dir? && right.dir?
+            diff_dir(left, right, options)
+        else
+            raise ArgumentError, "Left and right must both exist and be files or directories"
+        end
+    end
+
+
+    # Saves a diff report to +path+ in +format+.
+    #
+    # @param path [String] The path to the output report.
+    # @param format [Symbol] The output format for the report; one of :html or
+    #   :xlsx.
+    def output(path, format = :html)
+        path = case format.to_s
+        when /^html$/i
+            html_output(path)
+        when /^xls(x)?$/i
+            xl_output(path)
+        else
+            raise ArgumentError, "Unrecognised output format: #{format}"
+        end
+        Console.puts "Diff report saved to '#{path}'"
+    end
+
+
+    private
+
+
+    # Diff files that exist in both +left+ and +right+ directories.
+    def diff_dir(left, right, options)
+        pattern = options[:pattern] || '*'
+        Console.puts "Diffing files matching pattern '#{pattern}'..."
+        Dir[left + pattern].each do |file|
+            right_file = right + file.basename
+            if right_file.file?
+                diff_file(file, right_file, options)
+            end
+        end
+    end
+
+
+    # Diff two CSV files
+    def diff_files(left, right, options)
+        from = open_source(left, options)
+        to = open_source(right, options)
+        diff_file(from, to, options)
+    end
+
+
+    # Opens a source file.
+    #
+    # @param src [String] A path to the file to be opened.
+    # @param options [Hash] An options hash to be passed to CSVSource.
+    def open_source(src, options)
+        Console.write "Opening '#{src}'..."
+        csv_src = CSVDiff::CSVSource.new(src.to_s, options)
+        Console.puts "  #{csv_src.lines.size} lines read", :white
+        csv_src.warnings.each{ |warn| Console.puts warn, :yellow }
+        csv_src
+    end
+
+
+    # Diff two files, and add the results to the diff report.
+    #
+    # @param left [CSVSource] The source to be used for the left side of the diff
+    # @param right [CSVSource] The source to be used for the left side of the diff
+    # @param options [Hash] The options to be passed to CSVDiff.
+    def diff_file(left, right, options)
         diff = CSVDiff.new(left, right, options)
+        diff.diff_warnings.each{ |warn| Console.puts warn, :yellow }
         Console.write "Found #{diff.diffs.size} differences"
         diff.summary.each_with_index.map do |pair, i|
             Console.write i == 0 ? ": " : ", "
@@ -23,155 +123,7 @@ class CSVDiffReport
             Console.write "#{v} #{k}s", color
         end
         Console.puts
-        @diffs << diff
-    end
-
-
-    def output_xlsx(output)
-        # Create workbook
-        xl = xl_new
-
-        xl_summary_sheet(xl)
-
-        # Save workbook
-        path = "#{File.dirname(output)}/#{File.basename(output, File.extname(output))}.xlsx"
-        xl_save(xl, path)
-        Console.puts "Diff report saved to #{path}"
-    end
-
-
-    def output_html(output)
-        path = "#{File.dirname(output)}/#{File.basename(output, File.extname(output))}.html"
-    end
-
-
-    private
-
-
-    def xl_new
-        require 'axlsx'
-
-        @xl_styles = {}
-        xl = Axlsx::Package.new
-        xl.use_shared_strings = true
-        xl.workbook.styles do |s|
-            s.fonts[0].sz = 9
-            @xl_styles['Title'] = s.add_style(:b => true)
-            @xl_styles['Comma'] = s.add_style(:format_code => '#,##0')
-            @xl_styles['Right'] = s.add_style(:alignment => {:horizontal => :right})
-            @xl_styles['Add'] = s.add_style :fg_color => '00A000'
-            @xl_styles['Update'] = s.add_style :fg_color => '0000A0', :bg_color => 'F0F0FF'
-            @xl_styles['Move'] = s.add_style :fg_color => '4040FF'
-            @xl_styles['Delete'] = s.add_style :fg_color => 'FF0000', :strike => true
-        end
-        xl
-    end
-
-
-    # Add summary sheet
-    def xl_summary_sheet(xl)
-        compare_from = @diffs.first.left.path
-        compare_to = @diffs.first.right.path
-
-        xl.workbook.add_worksheet(name: 'Summary') do |sheet|
-            sheet.add_row do |row|
-                row.add_cell 'From:', :style => @xl_styles['Title']
-                row.add_cell compare_from
-            end
-            sheet.add_row do |row|
-                row.add_cell 'To:', :style => @xl_styles['Title']
-                row.add_cell compare_to
-            end
-            sheet.add_row
-            sheet.add_row ['Sheet', 'Adds', 'Deletes', 'Updates', 'Moves'], :style => @xl_styles['Title']
-            sheet.column_info.each do |ci|
-                ci.width = 10
-            end
-            sheet.column_info.first.width = 20
-
-            @diffs.each do |file_diff|
-                sheet.add_row([File.basename(file_diff.left.path, File.extname(file_diff.left.path)),
-                               file_diff.summary['Add'], file_diff.summary['Delete'],
-                               file_diff.summary['Update'], file_diff.summary['Move']])
-                xl_diff_sheet(xl, file_diff)
-            end
-        end
-
-    end
-
-
-    # Add diff sheet
-    def xl_diff_sheet(xl, diff)
-        sheet_name = File.basename(diff.left.path, File.extname(diff.left.path))
-        all_fields = [:row, :action, :sibling_position] + diff.diff_fields
-        xl.workbook.add_worksheet(name: sheet_name) do |sheet|
-            sheet.add_row(all_fields.map{ |f| f.to_s }, :style => @xl_styles['Title'])
-            diff.diffs.sort_by{|k, v| v[:row] }.each do |key, diff|
-                sheet.add_row do |row|
-                    chg = diff[:action]
-                    all_fields.each_with_index do |field, i|
-                        cell = nil
-                        comment = nil
-                        old = nil
-                        style = case chg
-                        when 'Add', 'Delete' then @xl_styles[chg]
-                        else 0
-                        end
-                        d = diff[field]
-                        if d.is_a?(Array)
-                            old = d.first
-                            new = d.last
-                            if old.nil?
-                                style = @xl_styles['Add']
-                            else
-                                style = @xl_styles[chg]
-                                comment = old
-                            end
-                        else
-                            new = d
-                            style = @xl_styles[chg] if i == 1
-                        end
-                        case new
-                        when String
-                            cell = row.add_cell(new.encode('utf-8'), :style => style) #, :type => :string)
-                        #    cell = row.add_cell(new, :style => style)
-                        else
-                            cell = row.add_cell(new, :style => style)
-                        end
-                        sheet.add_comment(:ref => cell.r, :author => 'Current', :visible => false,
-                                          :text => old.to_s.encode('utf-8')) if comment
-                    end
-                end
-            end
-            sheet.column_info.each do |ci|
-                ci.width = 80 if ci.width > 80
-            end
-            xl_filter_and_freeze(sheet, 5)
-        end
-    end
-
-
-    # Freeze the top row and +freeze_cols+ of +sheet+.
-    def xl_filter_and_freeze(sheet, freeze_cols = 0)
-        sheet.auto_filter = "A1:#{Axlsx::cell_r(sheet.rows.first.cells.size - 1, sheet.rows.size - 1)}"
-        sheet.sheet_view do |sv|
-            sv.pane do |p|
-                p.state = :frozen
-                p.x_split = freeze_cols
-                p.y_split = 1
-            end
-        end
-    end
-
-
-    # Save +xl+ package to +path+
-    def xl_save(xl, path)
-        begin
-            xl.serialize(path)
-        rescue RuntimeError => ex
-            Console.puts ex.message, :red
-            raise "Unable to replace existing Excel file #{path} - is it already open in Excel?"
-        end
+        self << diff
     end
 
 end
