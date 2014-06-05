@@ -39,7 +39,7 @@ class CSVDiffReport
         right = Pathname.new(right)
         if left.file? && right.file?
             diff_files(left, right, options)
-        elsif left.dir? && right.dir?
+        elsif left.directory? && right.directory?
             diff_dir(left, right, options)
         else
             raise ArgumentError, "Left and right must both exist and be files or directories"
@@ -73,9 +73,9 @@ class CSVDiffReport
         pattern = options[:pattern] || '*'
         Console.puts "Diffing files matching pattern '#{pattern}'..."
         Dir[left + pattern].each do |file|
-            right_file = right + file.basename
+            right_file = right + File.basename(file)
             if right_file.file?
-                diff_file(file, right_file, options)
+                diff_files(file, right_file.to_s, options)
             end
         end
     end
