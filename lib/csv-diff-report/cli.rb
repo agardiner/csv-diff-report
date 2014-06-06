@@ -39,10 +39,10 @@ class CSVDiffReport
 
         keyword_arg :ignore_fields, 'The names or indexes of any fields to be ignored during the diff',
             usage_break: 'Diff Options', on_parse: :parse_fields
-        flag_arg :ignore_adds, 'If true, items in TO that are not in FROM are ignored'
-        flag_arg :ignore_deletes, 'If true, items in FROM that are not in TO are ignored'
-        flag_arg :ignore_updates, 'If true, items in both sets that have changed are ignored'
-        flag_arg :ignore_moves, 'If true, items in both sets that have changed position are ignored'
+        flag_arg :ignore_adds, "If true, items in TO that are not in FROM are ignored"
+        flag_arg :ignore_deletes, "If true, items in FROM that are not in TO are ignored"
+        flag_arg :ignore_updates, "If true, changes to non-key properties are ignored"
+        flag_arg :ignore_moves, "If true, changes in an item's position are ignored"
 
         keyword_arg :format, 'The format in which to produce the diff report',
             default: 'HTML', validation: /^(html|xls(x)?)$/i, usage_break: 'Output Options'

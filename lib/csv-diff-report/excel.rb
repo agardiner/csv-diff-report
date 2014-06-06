@@ -67,7 +67,7 @@ class CSVDiffReport
                     sheet.add_row([File.basename(file_diff.left.path, File.extname(file_diff.left.path)),
                                    file_diff.summary['Add'], file_diff.summary['Delete'],
                                    file_diff.summary['Update'], file_diff.summary['Move']])
-                    xl_diff_sheet(xl, file_diff)
+                    xl_diff_sheet(xl, file_diff) if file_diff.diffs.size > 0
                 end
             end
 
