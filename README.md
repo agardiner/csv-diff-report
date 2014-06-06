@@ -1,7 +1,12 @@
 # CSV-Diff Report
 
 CSV-Diff Report is a command-line tool for generating diff reports in Excel or
-HTML format from CSV files.
+HTML format from CSV files. It uses the CSV-Diff gem to perform diffs, and adds
+to that library the ability to generate formatted reports, and a command-line
+tool `csvdiff` for running diffs between files or directories.
+
+
+## CSV-Diff
 
 Unlike a standard diff that compares line by line, and is sensitive to the
 ordering of records, CSV-Diff identifies common lines by key field(s), and
@@ -17,7 +22,7 @@ sibling order.
 
 ## Usage
 
-CSV-Diff is supplied as a gem, and has dependencies on a few small libraries.
+CSV-Diff Report is supplied as a gem, and has dependencies on a few small libraries.
 To install it, simply:
 ```
 gem install csv-diff-report
@@ -26,9 +31,60 @@ gem install csv-diff-report
 To compare two CSV files where the field names are in the first row of the file,
 and the first field contains the unique key for each record, simply use:
 ```
-require 'csv-diff'
+csvdiff <file1> <file2>
+```
 
-diff = CSVDiff.new(file1, file2)
+The `csvdiff` command-line tool provides many options to control behaviour of
+the diff and reporting process. To see all available options, run:
+```
+csv-diff --help
+```
+
+This will display a help screen like the following:
+```
+CSV-Diff
+========
+
+Generate a diff report between two files using the CSV-Diff algorithm.
+
+
+USAGE
+-----
+  ruby /usr/local/opt/ruby/bin/csvdiff FROM TO [OPTIONS]
+
+  FROM    The file or dir to use as the left or from source in the diff
+  TO      The file or dir to use as the right or to source in the diff
+
+
+OPTIONS
+-------
+
+Source Options
+  --pattern PATTERN                A file name pattern to use to filter matching files if a directory diff is
+                                   being performed
+                                   [Default: *]
+  --field-names FIELD-NAMES        A comma-separated list of field names for each field in the source files
+  --parent-fields PARENT-FIELDS    The parent field name(s) or index(es)
+  --child-fields CHILD-FIELDS      The child field name(s) or index(es)
+  --key-fields KEY-FIELDS          The key field name(s) or index(es)
+  --encoding ENCODING              The encoding to use when opening the CSV files
+  --ignore-header                  If true, the first line in each source file is ignored; requires the use of
+                                   the --field-names option to name the fields
+
+Diff Options
+  --ignore-fields IGNORE-FIELDS    The names or indexes of any fields to be ignored during the diff
+  --ignore-adds                    If true, items in TO that are not in FROM are ignored
+  --ignore-deletes                 If true, items in FROM that are not in TO are ignored
+  --ignore-updates                 If true, changes to non-key properties are ignored
+  --ignore-moves                   If true, changes in an item's position are ignored
+
+Output Options
+  --format FORMAT                  The format in which to produce the diff report
+                                   [Default: HTML]
+  --output OUTPUT                  The path to save the diff report to. If not specified, the diff report will
+                                   be placed in the same directory as the FROM file, and will be named
+                                   Diff_<FROM>_to_<TO>.<FORMAT>
+
 ```
 
 ## Unique Row Identifiers
