@@ -34,7 +34,7 @@ class CSVDiffReport
 
         # Returns the HTML head content, which contains the styles used for diffing.
         def html_styles
-            head = <<-EOT
+            style = <<-EOT
                 <style>
                     @font-face {font-family: Calibri;}
 
@@ -59,6 +59,7 @@ class CSVDiffReport
                     .separator {width: 200px; border-bottom: 1px gray solid;}
                 </style>
             EOT
+            style
         end
 
 

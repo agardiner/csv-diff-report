@@ -75,12 +75,12 @@ class CSVDiffReport
 
 
         # Add diff sheet
-        def xl_diff_sheet(xl, diff)
-            sheet_name = File.basename(diff.left.path, File.extname(diff.left.path))
-            all_fields = [:row, :action, :sibling_position] + diff.diff_fields
+        def xl_diff_sheet(xl, file_diff)
+            sheet_name = File.basename(file_diff.left.path, File.extname(file_diff.left.path))
+            all_fields = [:row, :action, :sibling_position] + file_diff.diff_fields
             xl.workbook.add_worksheet(name: sheet_name) do |sheet|
                 sheet.add_row(all_fields.map{ |f| f.to_s }, :style => @xl_styles['Title'])
-                diff.diffs.sort_by{|k, v| v[:row] }.each do |key, diff|
+                file_diff.diffs.sort_by{|k, v| v[:row] }.each do |key, diff|
                     sheet.add_row do |row|
                         chg = diff[:action]
                         all_fields.each_with_index do |field, i|
