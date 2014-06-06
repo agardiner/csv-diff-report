@@ -1,0 +1,8 @@
+#!ruby -w
+
+require 'csv-diff-report'
+require 'csv-diff-report/cli'
+
+
+CSVDiffReport::CLI.new.run
+
