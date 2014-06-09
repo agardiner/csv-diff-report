@@ -44,8 +44,8 @@ class CSVDiffReport
 
         # Add summary sheet
         def xl_summary_sheet(xl)
-            compare_from = @diffs.first.left.path
-            compare_to = @diffs.first.right.path
+            compare_from = @left
+            compare_to = @right
 
             xl.workbook.add_worksheet(name: 'Summary') do |sheet|
                 sheet.add_row do |row|

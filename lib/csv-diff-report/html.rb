@@ -65,6 +65,16 @@ class CSVDiffReport
 
         def html_summary(body)
             body << '<h2>Summary</h2>'
+
+            body << '<p>Source Locations:</p>'
+            body << '<table>'
+            body << '<tbody>'
+            body << "<tr><th>From:</th><td>#{@left}</td></tr>"
+            body << "<tr><th>To:</th><td>#{@right}</td></tr>"
+            body << '</tbody>'
+            body << '</table>'
+            body << '<br>'
+            body << '<p>Differences:</p>'
             body << '<table>'
             body << '<thead><tr>'
             body << '<th>File</th><th>Adds</th><th>Deletes</th><th>Updates</th><th>Moves</th>'

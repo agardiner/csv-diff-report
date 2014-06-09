@@ -70,9 +70,13 @@ class CSVDiffReport
 
     # Diff files that exist in both +left+ and +right+ directories.
     def diff_dir(left, right, options)
-        pattern = options[:pattern] || '*'
+        pattern = Pathname(options[:pattern] || '*')
+        @left = left + pattern
+        @right = right + pattern
+        Console.puts "From: #{@left}"
+        Console.puts "To:   #{@right}"
         Console.puts "Diffing files matching pattern '#{pattern}'..."
-        Dir[left + pattern].each do |file|
+        Dir[left + pattern].sort.each do |file|
             right_file = right + File.basename(file)
             if right_file.file?
                 diff_files(file, right_file.to_s, options)
@@ -83,6 +87,8 @@ class CSVDiffReport
 
     # Diff two CSV files
     def diff_files(left, right, options)
+        @left ||= left
+        @right ||= right
         from = open_source(left, options)
         to = open_source(right, options)
         diff_file(from, to, options)
