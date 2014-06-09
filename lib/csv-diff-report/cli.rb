@@ -25,6 +25,8 @@ class CSVDiffReport
 
         keyword_arg :pattern, 'A file name pattern to use to filter matching files if a directory ' +
             'diff is being performed', default: '*', usage_break: 'Source Options'
+        keyword_arg :exclude, 'A file name pattern of files to exclude from the diff if a directory ' +
+            'diff is being performed'
         keyword_arg :field_names, 'A comma-separated list of field names for each ' +
             'field in the source files', on_parse: :split_to_array
         keyword_arg :parent_fields, 'The parent field name(s) or index(es)',
@@ -79,6 +81,7 @@ class CSVDiffReport
         def process(arguments)
             options = {
                 pattern: arguments.pattern,
+                exclude: arguments.exclude,
                 field_names: arguments.field_names,
                 parent_fields: arguments.parent_fields,
                 child_fields: arguments.child_fields,

@@ -71,49 +71,49 @@ class CSVDiffReport
     # Diff files that exist in both +left+ and +right+ directories.
     def diff_dir(left, right, options)
         pattern = Pathname(options[:pattern] || '*')
+        exclude = options[:exclude]
         @left = left + pattern
         @right = right + pattern
-        Console.puts "From: #{@left}"
-        Console.puts "To:   #{@right}"
-        Console.puts "Diffing files matching pattern '#{pattern}'..."
-        Dir[left + pattern].sort.each do |file|
-            right_file = right + File.basename(file)
-            if right_file.file?
-                diff_files(file, right_file.to_s, options)
+        Console.puts "Performing directory diff:"
+        Console.puts "  From directory:  #{left}"
+        Console.puts "  To directory:    #{right}"
+        Console.puts "  Include Pattern: #{pattern}"
+        Console.puts "  Exclude Pattern: #{exclude}" if exclude
+        begin
+            left_files = Dir[left + pattern].sort
+            excludes = exclude ? Dir[left + exclude] : []
+            (left_files - excludes).each_with_index do |file, i|
+                Console.show_progress 'Diffing...', i, left_files.size
+                right_file = right + File.basename(file)
+                if right_file.file?
+                    diff_file(file, right_file.to_s, options)
+                end
             end
+        ensure
+            Console.clear_progress
         end
     end
 
 
     # Diff two CSV files
     def diff_files(left, right, options)
-        @left ||= left
-        @right ||= right
-        from = open_source(left, options)
-        to = open_source(right, options)
+        Console.puts "Performing file diff:"
+        Console.puts "  From file:  #{left}"
+        Console.puts "  To file:    #{right}"
+        @left = left
+        @right = right
         diff_file(from, to, options)
-    end
-
-
-    # Opens a source file.
-    #
-    # @param src [String] A path to the file to be opened.
-    # @param options [Hash] An options hash to be passed to CSVSource.
-    def open_source(src, options)
-        Console.write "Opening '#{src}'..."
-        csv_src = CSVDiff::CSVSource.new(src.to_s, options)
-        Console.puts "  #{csv_src.lines.size} lines read", :white
-        csv_src.warnings.each{ |warn| Console.puts warn, :yellow }
-        csv_src
     end
 
 
     # Diff two files, and add the results to the diff report.
     #
-    # @param left [CSVSource] The source to be used for the left side of the diff
-    # @param right [CSVSource] The source to be used for the left side of the diff
+    # @param left [String] The path to the left file
+    # @param right [String] The path to the right file
     # @param options [Hash] The options to be passed to CSVDiff.
     def diff_file(left, right, options)
+        from = open_source(left, :from, options)
+        to = open_source(right, :to, options)
         diff = CSVDiff.new(left, right, options)
         diff.diff_warnings.each{ |warn| Console.puts warn, :yellow }
         Console.write "Found #{diff.diffs.size} differences"
@@ -124,12 +124,25 @@ class CSVDiffReport
                     when 'Add' then :light_green
                     when 'Delete' then :red
                     when 'Update' then :cyan
-                    when 'Move' then :magenta
+                    when 'Move' then :light_magenta
                     end
             Console.write "#{v} #{k}s", color
         end
         Console.puts
         self << diff
+    end
+
+
+    # Opens a source file.
+    #
+    # @param src [String] A path to the file to be opened.
+    # @param options [Hash] An options hash to be passed to CSVSource.
+    def open_source(src, left_right, options)
+        Console.write "Opening #{left_right.to_s.upcase} file '#{File.basename(src)}'..."
+        csv_src = CSVDiff::CSVSource.new(src.to_s, options)
+        Console.puts "  #{csv_src.lines.size} lines read", :white
+        csv_src.warnings.each{ |warn| Console.puts warn, :yellow }
+        csv_src
     end
 
 end
