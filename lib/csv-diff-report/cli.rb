@@ -94,10 +94,12 @@ class CSVDiffReport
             rep = CSVDiffReport.new
             rep.diff(arguments.from, arguments.to, options)
 
+            output_dir = FileTest.directory?(arguments.from) ?
+                arguments.from : File.dirname(arguments.from)
+            left_name = File.basename(arguments.from, File.extname(arguments.from))
+            right_name = File.basename(arguments.to, File.extname(arguments.to))
             output = arguments.output ||
-                "#{File.dirname(arguments.from)}/Diff_#{
-                   File.basename(arguments.from, File.extname(arguments.from))
-                 }_to_#{File.basename(arguments.to, File.extname(arguments.to))}.diff"
+                "#{output_dir}/Diff_#{left_name}_to_#{right_name}.diff"
             rep.output(output, arguments.format)
         end
 
