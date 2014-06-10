@@ -79,21 +79,10 @@ class CSVDiffReport
 
         # Process a CSVDiffReport using +arguments+ to determine all options.
         def process(arguments)
-            options = {
-                pattern: arguments.pattern,
-                exclude: arguments.exclude,
-                field_names: arguments.field_names,
-                parent_fields: arguments.parent_fields,
-                child_fields: arguments.child_fields,
-                key_fields: arguments.key_fields,
-                encoding: arguments.encoding,
-                ignore_header: arguments.ignore_header,
-                ignore_fields: arguments.ignore_fields,
-                ignore_adds: arguments.ignore_adds,
-                ignore_deletes: arguments.ignore_deletes,
-                ignore_updates: arguments.ignore_updates,
-                ignore_moves: arguments.ignore_moves
-            }
+            options = {}
+            arguments.each_pair do |arg, val|
+                options[arg] = val if val && arg != :from && arg != :to
+            end
             rep = CSVDiffReport.new
             rep.diff(arguments.from, arguments.to, options)
 

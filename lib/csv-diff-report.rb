@@ -1,6 +1,7 @@
+require 'pathname'
+require 'yaml'
 require 'csv-diff'
 require 'color-console'
-require 'pathname'
 require 'csv-diff-report/excel'
 require 'csv-diff-report/html'
 
@@ -72,37 +73,62 @@ class CSVDiffReport
     def diff_dir(left, right, options)
         pattern = Pathname(options[:pattern] || '*')
         exclude = options[:exclude]
-        @left = left + pattern
-        @right = right + pattern
+        opt_path = Pathname(left + '.csvdiff')
+        opt_path = Pathname('.csvdiff') unless opt_path.exist?
+
         Console.puts "Performing directory diff:"
         Console.puts "  From directory:  #{left}"
         Console.puts "  To directory:    #{right}"
         Console.puts "  Include Pattern: #{pattern}"
         Console.puts "  Exclude Pattern: #{exclude}" if exclude
-        begin
-            left_files = Dir[left + pattern].sort
-            excludes = exclude ? Dir[left + exclude] : []
-            (left_files - excludes).each_with_index do |file, i|
-                Console.show_progress 'Diffing...', i, left_files.size
-                right_file = right + File.basename(file)
-                if right_file.file?
-                    diff_file(file, right_file.to_s, options)
-                end
+        Console.puts "  Options File:    #{opt_path}" if opt_path.exist?
+
+        @left = left + pattern
+        @right = right + pattern
+        opt_file = load_opt_file(opt_path)
+
+        left_files = Dir[left + pattern].sort
+        excludes = exclude ? Dir[left + exclude] : []
+        (left_files - excludes).each_with_index do |file, i|
+            right_file = right + File.basename(file)
+            if right_file.file?
+                diff_file(file, right_file.to_s, options, opt_file)
+            else
+                Console.puts "Skipping file '#{File.basename(file)}', as there is " +
+                    "no corresponding TO file", :yellow
             end
-        ensure
-            Console.clear_progress
         end
     end
 
 
     # Diff two CSV files
     def diff_files(left, right, options)
+        opt_path = Pathname(left + '.csvdiff')
+        opt_path = Pathname('.csvdiff') unless opt_path.exist?
+
         Console.puts "Performing file diff:"
-        Console.puts "  From file:  #{left}"
-        Console.puts "  To file:    #{right}"
+        Console.puts "  From File:    #{left}"
+        Console.puts "  To File:      #{right}"
+        Console.puts "  Options File: #{opt_path}" if opt_path.exist?
+
         @left = left
         @right = right
-        diff_file(from, to, options)
+        opt_file = load_opt_file(opt_path)
+        diff_file(from, to, options, opt_file)
+    end
+
+
+    # Loads an options file at +opt_path+
+    def load_opt_file(opt_path)
+        opt_file = YAML.load(IO.read(opt_path)) if opt_path.exist?
+        symbolize_keys(opt_file)
+    end
+
+
+    # Convert keys in hashes to lower-case symbols for consistency
+    def symbolize_keys(hsh)
+        Hash[hsh.map{ |k, v| [k.to_s.downcase.intern, v.is_a?(Hash) ?
+            symbolize_keys(v) : v] }]
     end
 
 
@@ -111,7 +137,10 @@ class CSVDiffReport
     # @param left [String] The path to the left file
     # @param right [String] The path to the right file
     # @param options [Hash] The options to be passed to CSVDiff.
-    def diff_file(left, right, options)
+    def diff_file(left, right, options, opt_file)
+        settings = find_file_type_settings(left, opt_file)
+        return if settings[:ignore]
+        options = settings.merge(options)
         from = open_source(left, :from, options)
         to = open_source(right, :to, options)
         diff = CSVDiff.new(left, right, options)
@@ -130,6 +159,31 @@ class CSVDiffReport
         end
         Console.puts
         self << diff
+    end
+
+
+    # Locates any file type settings for +left+ in the +opt_file+ hash.
+    def find_file_type_settings(left, opt_file)
+        left = Pathname(left.gsub('\\', '/'))
+        settings = opt_file && opt_file[:defaults] || {}
+        opt_file && opt_file[:file_types] && opt_file[:file_types].each do |file_type, hsh|
+            unless hsh[:pattern]
+                Console.puts "Invalid setting for file_type #{file_type} in .csvdiff; " +
+                    "missing a 'pattern' key to use to match files", :yellow
+                hsh[:pattern] = '-'
+            end
+            next if hsh[:pattern] == '-'
+            unless hsh[:matched_files]
+                hsh[:matched_files] = Dir[(left.dirname + hsh[:pattern]).to_s]
+                hsh[:matched_files] -= Dir[(left.dirname + hsh[:exclude]).to_s] if hsh[:exclude]
+            end
+            if hsh[:matched_files].include?(left.to_s)
+                settings.merge!(hsh)
+                [:pattern, :exclude, :matched_files].each{ |k| settings.delete(k) }
+                break
+            end
+        end
+        settings
     end
 
 
