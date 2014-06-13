@@ -36,12 +36,29 @@ class CSVDiffReport
     #
     # @param options [Hash] Options to be passed to the diff process.
     def diff(left, right, options = {})
-        left = Pathname.new(left)
-        right = Pathname.new(right)
-        if left.file? && right.file?
-            diff_files(left, right, options)
-        elsif left.directory? && right.directory?
-            diff_dir(left, right, options)
+        @left = Pathname.new(left)
+        @right = Pathname.new(right)
+        if @left.file? && @right.file?
+            Console.puts "Performing file diff:"
+            Console.puts "  From File:    #{@left}"
+            Console.puts "  To File:      #{@right}"
+            opt_file = load_opt_file(@left.dirname)
+            diff_files(@left, @right, options, opt_file)
+        elsif @left.directory? && @right.directory?
+            Console.puts "Performing directory diff:"
+            Console.puts "  From directory:  #{@left}"
+            Console.puts "  To directory:    #{@right}"
+            opt_file = load_opt_file(@left)
+            if fts = options[:file_types]
+                file_types = find_matching_file_types(fts, opt_file)
+                file_types.each do |file_type|
+                    hsh = opt_file[:file_types][file_type]
+                    ft_opts = options.merge(hsh)
+                    diff_dir(@left, @right, ft_opts, opt_file)
+                end
+            else
+                diff_dir(@left, @right, options, opt_file)
+            end
         else
             raise ArgumentError, "Left and right must both exist and be files or directories"
         end
@@ -69,23 +86,52 @@ class CSVDiffReport
     private
 
 
+    # Loads an options file from +dir+
+    def load_opt_file(dir)
+        opt_path = Pathname(dir + '.csvdiff')
+        opt_path = Pathname('.csvdiff') unless opt_path.exist?
+        if opt_path.exist?
+            Console.puts "Loading options from .csvdiff at '#{dir}'"
+            opt_file = YAML.load(IO.read(opt_path))
+            symbolize_keys(opt_file)
+        end
+    end
+
+
+    # Convert keys in hashes to lower-case symbols for consistency
+    def symbolize_keys(hsh)
+        Hash[hsh.map{ |k, v| [k.to_s.downcase.intern, v.is_a?(Hash) ?
+            symbolize_keys(v) : v] }]
+    end
+
+
+    # Locates the file types in +opt_file+ that match the +file_types+ list of
+    # file type names or patterns
+    def find_matching_file_types(file_types, opt_file)
+        known_fts = opt_file[:file_types].keys
+        matched_fts = []
+        file_types.each do |ft|
+            re = Regexp.new(ft.gsub('.', '\.').gsub('?', '.').gsub('*', '.*'), true)
+            matches = known_fts.select{ |file_type| file_type.to_s =~ re }
+            if matches.size > 0
+                matched_fts.concat(matches)
+            else
+                Console.puts "No file type matching '#{ft}' defined in .csvdiff", :yellow
+                Console.puts "Known file types are: #{opt_file[:file_types].keys.join(', ')}", :yellow
+            end
+        end
+        matched_fts.uniq
+    end
+
+
     # Diff files that exist in both +left+ and +right+ directories.
-    def diff_dir(left, right, options)
+    def diff_dir(left, right, options, opt_file)
         pattern = Pathname(options[:pattern] || '*')
         exclude = options[:exclude]
-        opt_path = Pathname(left + '.csvdiff')
-        opt_path = Pathname('.csvdiff') unless opt_path.exist?
 
-        Console.puts "Performing directory diff:"
-        Console.puts "  From directory:  #{left}"
-        Console.puts "  To directory:    #{right}"
         Console.puts "  Include Pattern: #{pattern}"
         Console.puts "  Exclude Pattern: #{exclude}" if exclude
-        Console.puts "  Options File:    #{opt_path}" if opt_path.exist?
 
-        @left = left + pattern
-        @right = right + pattern
-        opt_file = load_opt_file(opt_path)
 
         left_files = Dir[left + pattern].sort
         excludes = exclude ? Dir[left + exclude] : []
@@ -102,33 +148,10 @@ class CSVDiffReport
 
 
     # Diff two CSV files
-    def diff_files(left, right, options)
-        opt_path = Pathname(left + '.csvdiff')
-        opt_path = Pathname('.csvdiff') unless opt_path.exist?
-
-        Console.puts "Performing file diff:"
-        Console.puts "  From File:    #{left}"
-        Console.puts "  To File:      #{right}"
-        Console.puts "  Options File: #{opt_path}" if opt_path.exist?
-
+    def diff_files(left, right, options, opt_file)
         @left = left
         @right = right
-        opt_file = load_opt_file(opt_path)
         diff_file(from, to, options, opt_file)
-    end
-
-
-    # Loads an options file at +opt_path+
-    def load_opt_file(opt_path)
-        opt_file = YAML.load(IO.read(opt_path)) if opt_path.exist?
-        symbolize_keys(opt_file)
-    end
-
-
-    # Convert keys in hashes to lower-case symbols for consistency
-    def symbolize_keys(hsh)
-        Hash[hsh.map{ |k, v| [k.to_s.downcase.intern, v.is_a?(Hash) ?
-            symbolize_keys(v) : v] }]
     end
 
 
@@ -154,6 +177,7 @@ class CSVDiffReport
                     when 'Delete' then :red
                     when 'Update' then :cyan
                     when 'Move' then :light_magenta
+                    when 'Warning' then :yellow
                     end
             Console.write "#{v} #{k}s", color
         end

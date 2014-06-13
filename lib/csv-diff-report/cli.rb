@@ -26,27 +26,38 @@ class CSVDiffReport
             'diff is being performed', default: '*'
 
         usage_break 'Source Options'
+        keyword_arg :file_types, 'A comma-separated list of file-type names (supports wildcards) to process. ' +
+            'Requires the presence of a .csvdiff file in the FROM or current directory to define ' +
+            'the file type patterns',
+            short_key: 't', on_parse: :split_to_array
         keyword_arg :exclude, 'A file name pattern of files to exclude from the diff if a directory ' +
-            'diff is being performed'
+            'diff is being performed',
+            short_key: 'x'
         keyword_arg :field_names, 'A comma-separated list of field names for each ' +
-            'field in the source files', on_parse: :split_to_array
+            'field in the source files',
+            short_key: 'f', on_parse: :split_to_array
         keyword_arg :parent_fields, 'The parent field name(s) or index(es)',
-            on_parse: :parse_fields
+            short_key: 'p', on_parse: :parse_fields
         keyword_arg :child_fields, 'The child field name(s) or index(es)',
-            on_parse: :parse_fields
+            short_key: 'c', on_parse: :parse_fields
         keyword_arg :key_fields, 'The key field name(s) or index(es)',
-            on_parse: :parse_fields
-        keyword_arg :encoding, 'The encoding to use when opening the CSV files'
+            short_key: 'k', on_parse: :parse_fields
+        keyword_arg :encoding, 'The encoding to use when opening the CSV files',
+            short_key: 'e'
         flag_arg :ignore_header, 'If true, the first line in each source file is ignored; ' +
             'requires the use of the --field-names option to name the fields'
 
         usage_break 'Diff Options'
         keyword_arg :ignore_fields, 'The names or indexes of any fields to be ignored during the diff',
-            on_parse: :parse_fields
-        flag_arg :ignore_adds, "If true, items in TO that are not in FROM are ignored"
-        flag_arg :ignore_deletes, "If true, items in FROM that are not in TO are ignored"
-        flag_arg :ignore_updates, "If true, changes to non-key properties are ignored"
-        flag_arg :ignore_moves, "If true, changes in an item's position are ignored"
+            short_key: 'i', on_parse: :parse_fields
+        flag_arg :ignore_adds, "If true, items in TO that are not in FROM are ignored",
+            short_key: 'A'
+        flag_arg :ignore_deletes, "If true, items in FROM that are not in TO are ignored",
+            short_key: 'D'
+        flag_arg :ignore_updates, "If true, changes to non-key properties are ignored",
+            short_key: 'U'
+        flag_arg :ignore_moves, "If true, changes in an item's position are ignored",
+            short_key: 'M'
 
         usage_break 'Output Options'
         keyword_arg :format, 'The format in which to produce the diff report',
