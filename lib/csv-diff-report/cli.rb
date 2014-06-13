@@ -10,9 +10,9 @@ class CSVDiffReport
 
         # Define an on_parse handler for field names or indexes. Splits the
         # supplied argument value on commas, and converts numbers to Fixnums.
-        ArgParser::OnParseHandlers[:parse_fields] = lambda{ |val, arg, hsh|
+        register_parse_handler(:parse_fields) do |val, arg, hsh|
             val.split(',').map{ |fld| fld =~ /^\d+$/ ? fld.to_i : fld }
-        }
+        end
 
         title 'CSV-Diff'
 
@@ -22,9 +22,10 @@ class CSVDiffReport
 
         positional_arg :from, 'The file or dir to use as the left or from source in the diff'
         positional_arg :to, 'The file or dir to use as the right or to source in the diff'
+        positional_arg :pattern, 'A file name pattern to use to filter matching files if a directory ' +
+            'diff is being performed', default: '*'
 
-        keyword_arg :pattern, 'A file name pattern to use to filter matching files if a directory ' +
-            'diff is being performed', default: '*', usage_break: 'Source Options'
+        usage_break 'Source Options'
         keyword_arg :exclude, 'A file name pattern of files to exclude from the diff if a directory ' +
             'diff is being performed'
         keyword_arg :field_names, 'A comma-separated list of field names for each ' +
@@ -39,15 +40,17 @@ class CSVDiffReport
         flag_arg :ignore_header, 'If true, the first line in each source file is ignored; ' +
             'requires the use of the --field-names option to name the fields'
 
+        usage_break 'Diff Options'
         keyword_arg :ignore_fields, 'The names or indexes of any fields to be ignored during the diff',
-            usage_break: 'Diff Options', on_parse: :parse_fields
+            on_parse: :parse_fields
         flag_arg :ignore_adds, "If true, items in TO that are not in FROM are ignored"
         flag_arg :ignore_deletes, "If true, items in FROM that are not in TO are ignored"
         flag_arg :ignore_updates, "If true, changes to non-key properties are ignored"
         flag_arg :ignore_moves, "If true, changes in an item's position are ignored"
 
+        usage_break 'Output Options'
         keyword_arg :format, 'The format in which to produce the diff report',
-            default: 'HTML', validation: /^(html|xls(x)?)$/i, usage_break: 'Output Options'
+            default: 'HTML', validation: /^(html|xls(x)?)$/i
         keyword_arg :output, 'The path to save the diff report to. If not specified, the diff ' +
             'report will be placed in the same directory as the FROM file, and will be named ' +
             'Diff_<FROM>_to_<TO>.<FORMAT>'
