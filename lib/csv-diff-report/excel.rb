@@ -1,5 +1,5 @@
 
-class CSVDiffReport
+class CSVDiff
 
     # Defines functionality for exporting a Diff report to Excel in XLSX format
     # using the Axlsx library.

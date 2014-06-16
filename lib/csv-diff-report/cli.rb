@@ -2,7 +2,7 @@ require 'arg-parser'
 require 'csv-diff-report'
 
 
-class CSVDiffReport
+class CSVDiff
 
     class CLI
 
@@ -97,7 +97,7 @@ class CSVDiffReport
             arguments.each_pair do |arg, val|
                 options[arg] = val if val && arg != :from && arg != :to
             end
-            rep = CSVDiffReport.new
+            rep = CSVDiff::Report.new
             rep.diff(arguments.from, arguments.to, options)
 
             output_dir = FileTest.directory?(arguments.from) ?
@@ -115,5 +115,5 @@ end
 
 
 if __FILE__ == $0
-    CSVDiffReport::CLI.new.run
+    CSVDiff::CLI.new.run
 end

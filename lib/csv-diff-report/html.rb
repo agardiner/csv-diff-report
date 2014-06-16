@@ -1,5 +1,5 @@
 
-class CSVDiffReport
+class CSVDiff
 
     # Defines functionality for exporting a Diff report in HTML format.
     module Html
