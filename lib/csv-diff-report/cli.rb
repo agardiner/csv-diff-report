@@ -44,6 +44,7 @@ class CSVDiff
             short_key: 'k', on_parse: :parse_fields
         keyword_arg :encoding, 'The encoding to use when opening the CSV files',
             short_key: 'e'
+        flag_arg :tab_delimited, 'If true, the file is assumed to be tab-delimited rather than comma-delimited'
         flag_arg :ignore_header, 'If true, the first line in each source file is ignored; ' +
             'requires the use of the --field-names option to name the fields'
 
@@ -94,9 +95,11 @@ class CSVDiff
         # Process a CSVDiffReport using +arguments+ to determine all options.
         def process(arguments)
             options = {}
+            exclude_args = [:from, :to, :tab_delimited]
             arguments.each_pair do |arg, val|
-                options[arg] = val if val && arg != :from && arg != :to
+                options[arg] = val if val && !exclude_args.include?(arg)
             end
+            options[:csv_options] = {:col_sep => "\t"} if arguments.tab_delimited
             rep = CSVDiff::Report.new
             rep.diff(arguments.from, arguments.to, options)
 
