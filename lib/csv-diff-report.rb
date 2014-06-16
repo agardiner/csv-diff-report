@@ -43,7 +43,7 @@ class CSVDiffReport
             Console.puts "  From File:    #{@left}"
             Console.puts "  To File:      #{@right}"
             opt_file = load_opt_file(@left.dirname)
-            diff_files(@left, @right, options, opt_file)
+            diff_file(@left.to_s, @right.to_s, options, opt_file)
         elsif @left.directory? && @right.directory?
             Console.puts "Performing directory diff:"
             Console.puts "  From directory:  #{@left}"
@@ -144,14 +144,6 @@ class CSVDiffReport
                     "no corresponding TO file", :yellow
             end
         end
-    end
-
-
-    # Diff two CSV files
-    def diff_files(left, right, options, opt_file)
-        @left = left
-        @right = right
-        diff_file(from, to, options, opt_file)
     end
 
 
