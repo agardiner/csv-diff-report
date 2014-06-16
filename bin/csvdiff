@@ -4,5 +4,5 @@ require 'csv-diff-report'
 require 'csv-diff-report/cli'
 
 
-CSVDiffReport::CLI.new.run
+CSVDiff::CLI.new.run
 
