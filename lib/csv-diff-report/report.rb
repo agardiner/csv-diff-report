@@ -106,16 +106,24 @@ class CSVDiff
         # Locates the file types in +opt_file+ that match the +file_types+ list of
         # file type names or patterns
         def find_matching_file_types(file_types, opt_file)
-            known_fts = opt_file[:file_types].keys
             matched_fts = []
-            file_types.each do |ft|
-                re = Regexp.new(ft.gsub('.', '\.').gsub('?', '.').gsub('*', '.*'), true)
-                matches = known_fts.select{ |file_type| file_type.to_s =~ re }
-                if matches.size > 0
-                    matched_fts.concat(matches)
+            if known_fts = opt_file && opt_file[:file_types] && opt_file[:file_types].keys
+                file_types.each do |ft|
+                    re = Regexp.new(ft.gsub('.', '\.').gsub('?', '.').gsub('*', '.*'), true)
+                    matches = known_fts.select{ |file_type| file_type.to_s =~ re }
+                    if matches.size > 0
+                        matched_fts.concat(matches)
+                    else
+                        Console.puts "No file type matching '#{ft}' defined in .csvdiff", :yellow
+                        Console.puts "Known file types are: #{opt_file[:file_types].keys.join(', ')}", :yellow
+                    end
+                end
+            else
+                if opt_file
+                    Console.puts "No file types are defined in .csvdiff", :yellow
                 else
-                    Console.puts "No file type matching '#{ft}' defined in .csvdiff", :yellow
-                    Console.puts "Known file types are: #{opt_file[:file_types].keys.join(', ')}", :yellow
+                    Console.puts "The file_types option can only be used when a " +
+                        ".csvdiff is present in the LEFT or current directory", :yellow
                 end
             end
             matched_fts.uniq
