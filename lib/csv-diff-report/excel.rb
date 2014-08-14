@@ -81,8 +81,8 @@ class CSVDiff
                 File.basename(file_diff.left.path, File.extname(file_diff.left.path))
             all_fields = [:row, :action]
             all_fields << :sibling_position unless file_diff.options[:ignore_moves]
-            freeze_cols = file_diff(:freeze_cols, all_fields.length +
-                                    file_diff.left.key_fields.max + 1)
+            freeze_cols = file_diff.options[:freeze_cols] ||
+                (all_fields.length + file_diff.left.key_fields.max + 1)
             all_fields.concat(file_diff.diff_fields)
             xl.workbook.add_worksheet(name: sheet_name) do |sheet|
                 sheet.add_row(all_fields.map{ |f| f.is_a?(Symbol) ? f.to_s.titleize : f },
