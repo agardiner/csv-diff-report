@@ -69,8 +69,13 @@ class CSVDiff
             body << '<p>Source Locations:</p>'
             body << '<table>'
             body << '<tbody>'
-            body << "<tr><th>From:</th><td>#{@left}</td></tr>"
-            body << "<tr><th>To:</th><td>#{@right}</td></tr>"
+            if @diffs.size > 1
+                body << "<tr><th>From:</th><td>#{File.dirname(@left)}</td></tr>"
+                body << "<tr><th>To:</th><td>#{File.dirname(@right)}</td></tr>"
+            else
+                body << "<tr><th>From:</th><td>#{@left}</td></tr>"
+                body << "<tr><th>To:</th><td>#{@right}</td></tr>"
+            end
             body << '</tbody>'
             body << '</table>'
             body << '<br>'
@@ -124,11 +129,13 @@ class CSVDiff
             end
             body << '</p>'
 
-            all_fields = [:row, :action, :sibling_position] + file_diff.diff_fields
+            all_fields = [:row, :action]
+            all_fields << :sibling_position unless file_diff.options[:ignore_moves]
+            all_fields.concat(file_diff.diff_fields)
             body << '<table>'
             body << '<thead><tr>'
             all_fields.each do |fld|
-                body << "<th>#{fld.to_s}</th>"
+                body << "<th>#{fld.is_a?(Symbol) ? fld.to_s.titleize : fld}</th>"
             end
             body << '</tr></thead>'
             body << '<tbody>'

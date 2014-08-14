@@ -50,11 +50,11 @@ class CSVDiff
             xl.workbook.add_worksheet(name: 'Summary') do |sheet|
                 sheet.add_row do |row|
                     row.add_cell 'From:', :style => @xl_styles['Title']
-                    row.add_cell compare_from
+                    row.add_cell @diffs.size > 1 ? File.dirname(compare_from) : compare_from
                 end
                 sheet.add_row do |row|
                     row.add_cell 'To:', :style => @xl_styles['Title']
-                    row.add_cell compare_to
+                    row.add_cell @diffs.size > 1 ? File.dirname(compare_to) : compare_to
                 end
                 sheet.add_row
                 sheet.add_row ['Sheet', 'Adds', 'Deletes', 'Updates', 'Moves'], :style => @xl_styles['Title']
@@ -64,7 +64,8 @@ class CSVDiff
                 sheet.column_info.first.width = 20
 
                 @diffs.each do |file_diff|
-                    sheet.add_row([File.basename(file_diff.left.path, File.extname(file_diff.left.path)),
+                    sheet.add_row([file_diff.options[:sheet_name] ||
+                                   File.basename(file_diff.left.path, File.extname(file_diff.left.path)),
                                    file_diff.summary['Add'], file_diff.summary['Delete'],
                                    file_diff.summary['Update'], file_diff.summary['Move']])
                     xl_diff_sheet(xl, file_diff) if file_diff.diffs.size > 0
@@ -76,10 +77,16 @@ class CSVDiff
 
         # Add diff sheet
         def xl_diff_sheet(xl, file_diff)
-            sheet_name = File.basename(file_diff.left.path, File.extname(file_diff.left.path))
-            all_fields = [:row, :action, :sibling_position] + file_diff.diff_fields
+            sheet_name = file_diff.options[:sheet_name] ||
+                File.basename(file_diff.left.path, File.extname(file_diff.left.path))
+            all_fields = [:row, :action]
+            all_fields << :sibling_position unless file_diff.options[:ignore_moves]
+            freeze_cols = file_diff(:freeze_cols, all_fields.length +
+                                    file_diff.left.key_fields.max + 1)
+            all_fields.concat(file_diff.diff_fields)
             xl.workbook.add_worksheet(name: sheet_name) do |sheet|
-                sheet.add_row(all_fields.map{ |f| f.to_s }, :style => @xl_styles['Title'])
+                sheet.add_row(all_fields.map{ |f| f.is_a?(Symbol) ? f.to_s.titleize : f },
+                              :style => @xl_styles['Title'])
                 file_diff.diffs.sort_by{|k, v| v[:row] }.each do |key, diff|
                     sheet.add_row do |row|
                         chg = diff[:action]
@@ -108,7 +115,6 @@ class CSVDiff
                             case new
                             when String
                                 cell = row.add_cell(new.encode('utf-8'), :style => style) #, :type => :string)
-                            #    cell = row.add_cell(new, :style => style)
                             else
                                 cell = row.add_cell(new, :style => style)
                             end
@@ -120,7 +126,7 @@ class CSVDiff
                 sheet.column_info.each do |ci|
                     ci.width = 80 if ci.width > 80
                 end
-                xl_filter_and_freeze(sheet, 5)
+                xl_filter_and_freeze(sheet, freeze_cols)
             end
         end
 
