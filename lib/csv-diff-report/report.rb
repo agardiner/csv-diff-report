@@ -45,6 +45,10 @@ class CSVDiff
         def <<(diff)
             if diff.is_a?(CSVDiff)
                 @diffs << diff
+                unless @left
+                    @left = Pathname.new(diff.left.path)
+                    @right = Pathname.new(diff.right.path)
+                end
             else
                 raise ArgumentError, "Only CSVDiff objects can be added to a CSVDiff::Report"
             end
