@@ -49,6 +49,22 @@ class CSVDiff
                     @left = Pathname.new(diff.left.path)
                     @right = Pathname.new(diff.right.path)
                 end
+                diff.diff_warnings.each{ |warn| echo warn, :yellow }
+                out = []
+                out << ["Found #{diff.diffs.size} differences"]
+                diff.summary.each_with_index.map do |pair, i|
+                    out << [i == 0 ? ": " : ", "]
+                    k, v = pair
+                    color = case k
+                            when 'Add' then :light_green
+                            when 'Delete' then :red
+                            when 'Update' then :cyan
+                            when 'Move' then :light_magenta
+                            when 'Warning' then :yellow
+                            end
+                    out << ["#{v} #{k}s", color]
+                end
+                echo *out
             else
                 raise ArgumentError, "Only CSVDiff objects can be added to a CSVDiff::Report"
             end
@@ -190,22 +206,6 @@ class CSVDiff
             from = open_source(left, :from, options)
             to = open_source(right, :to, options)
             diff = CSVDiff.new(left, right, options)
-            diff.diff_warnings.each{ |warn| echo warn, :yellow }
-            out = []
-            out << ["Found #{diff.diffs.size} differences"]
-            diff.summary.each_with_index.map do |pair, i|
-                out << [i == 0 ? ": " : ", "]
-                k, v = pair
-                color = case k
-                        when 'Add' then :light_green
-                        when 'Delete' then :red
-                        when 'Update' then :cyan
-                        when 'Move' then :light_magenta
-                        when 'Warning' then :yellow
-                        end
-                out << ["#{v} #{k}s", color]
-            end
-            echo *out
             self << diff
             diff
         end
