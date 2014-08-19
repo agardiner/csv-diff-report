@@ -149,7 +149,7 @@ class CSVDiff
             begin
                 xl.serialize(path)
                 path
-            rescue RuntimeError => ex
+            rescue StandardError => ex
                 Console.puts ex.message, :red
                 raise "Unable to replace existing Excel file #{path} - is it already open in Excel?"
             end
