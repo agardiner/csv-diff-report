@@ -114,7 +114,13 @@ class CSVDiff
                             end
                             case new
                             when String
-                                cell = row.add_cell(new.encode('utf-8'), :style => style) #, :type => :string)
+                                if new =~ /^0+\d+(\.\d+)?/
+                                    # Don't let Excel auto-convert this to a number, as that
+                                    # will remove the leading zero(s)
+                                    cell = row.add_cell(new, :style => style, :type => :string)
+                                else
+                                    cell = row.add_cell(new.encode('utf-8'), :style => style)
+                                end
                             else
                                 cell = row.add_cell(new, :style => style)
                             end
