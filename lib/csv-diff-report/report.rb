@@ -31,10 +31,10 @@ class CSVDiff
 
         def echo(*args)
             if @echo_handler
-                @echo_handler.call *args
+                @echo_handler.call(*args)
             else
                 args.each do |out|
-                    Console.write *out
+                    Console.write(*out)
                 end
                 Console.puts
             end
@@ -64,7 +64,7 @@ class CSVDiff
                             end
                     out << ["#{v} #{k}s", color]
                 end
-                echo *out
+                echo(*out)
             else
                 raise ArgumentError, "Only CSVDiff objects can be added to a CSVDiff::Report"
             end
@@ -205,7 +205,7 @@ class CSVDiff
             options = settings.merge(options)
             from = open_source(left, :from, options)
             to = open_source(right, :to, options)
-            diff = CSVDiff.new(left, right, options)
+            diff = CSVDiff.new(from, to, options)
             self << diff
             diff
         end
@@ -244,7 +244,7 @@ class CSVDiff
             out = ["Opening #{left_right.to_s.upcase} file '#{File.basename(src)}'..."]
             csv_src = CSVDiff::CSVSource.new(src.to_s, options)
             out << ["  #{csv_src.lines.size} lines read", :white]
-            echo *out
+            echo(*out)
             csv_src.warnings.each{ |warn| echo warn, :yellow }
             csv_src
         end
