@@ -47,6 +47,7 @@ class CSVDiff
         flag_arg :tab_delimited, 'If true, the file is assumed to be tab-delimited rather than comma-delimited'
         flag_arg :ignore_header, 'If true, the first line in each source file is ignored; ' +
             'requires the use of the --field-names option to name the fields'
+        flag_arg :ignore_case, 'If true, field comparisons are performed without regard to case'
 
         usage_break 'Diff Options'
         keyword_arg :ignore_fields, 'The names or indexes of any fields to be ignored during the diff',
@@ -95,11 +96,12 @@ class CSVDiff
         # Process a CSVDiffReport using +arguments+ to determine all options.
         def process(arguments)
             options = {}
-            exclude_args = [:from, :to, :tab_delimited]
+            exclude_args = [:from, :to, :tab_delimited, :ignore_case]
             arguments.each_pair do |arg, val|
                 options[arg] = val if val && !exclude_args.include?(arg)
             end
             options[:csv_options] = {:col_sep => "\t"} if arguments.tab_delimited
+            options[:case_sensitive] = !arguments.ignore_case
             rep = CSVDiff::Report.new
             rep.diff(arguments.from, arguments.to, options)
 
