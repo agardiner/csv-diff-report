@@ -184,9 +184,8 @@ class CSVDiff
             echo "  Include Pattern: #{pattern}"
             echo "  Exclude Pattern: #{exclude}" if exclude
 
-
-            left_files = Dir[left + pattern].sort
-            excludes = exclude ? Dir[left + exclude] : []
+            left_files = Dir[(left + pattern).to_s.gsub('\\', '/')].sort
+            excludes = exclude ? Dir[(left + exclude).to_s.gsub('\\', '/')] : []
             (left_files - excludes).each_with_index do |file, i|
                 right_file = right + File.basename(file)
                 if right_file.file?
@@ -228,8 +227,8 @@ class CSVDiff
                 end
                 next if hsh[:pattern] == '-'
                 unless hsh[:matched_files]
-                    hsh[:matched_files] = Dir[(left.dirname + hsh[:pattern]).to_s]
-                    hsh[:matched_files] -= Dir[(left.dirname + hsh[:exclude]).to_s] if hsh[:exclude]
+                    hsh[:matched_files] = Dir[(left.dirname + hsh[:pattern]).to_s.gsub('\\', '/')]
+                    hsh[:matched_files] -= Dir[(left.dirname + hsh[:exclude]).to_s.gsub('\\', '/')] if hsh[:exclude]
                 end
                 if hsh[:matched_files].include?(left.to_s)
                     settings.merge!(hsh)
