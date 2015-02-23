@@ -130,7 +130,7 @@ class CSVDiff
             opt_path = Pathname(dir + '.csvdiff')
             opt_path = Pathname('.csvdiff') unless opt_path.exist?
             if opt_path.exist?
-                echo "Loading options from .csvdiff at '#{dir}'"
+                echo "Loading options from '#{opt_path}'"
                 opt_file = YAML.load(IO.read(opt_path))
                 symbolize_keys(opt_file)
             end
@@ -141,6 +141,11 @@ class CSVDiff
         def symbolize_keys(hsh)
             Hash[hsh.map{ |k, v| [k.to_s.downcase.intern, v.is_a?(Hash) ?
                 symbolize_keys(v) : v] }]
+        end
+
+
+        def titleize(sym)
+            sym.to_s.gsub(/_/, ' ').gsub(/\b([a-z])/) { $1.upcase }
         end
 
 

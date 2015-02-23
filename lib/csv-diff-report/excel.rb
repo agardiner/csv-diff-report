@@ -85,7 +85,7 @@ class CSVDiff
                 (all_fields.length + file_diff.left.key_fields.max + 1)
             all_fields.concat(file_diff.diff_fields)
             xl.workbook.add_worksheet(name: sheet_name) do |sheet|
-                sheet.add_row(all_fields.map{ |f| f.is_a?(Symbol) ? f.to_s.titleize : f },
+                sheet.add_row(all_fields.map{ |f| f.is_a?(Symbol) ? titleize(f) : f },
                               :style => @xl_styles['Title'])
                 file_diff.diffs.sort_by{|k, v| v[:row] }.each do |key, diff|
                     sheet.add_row do |row|

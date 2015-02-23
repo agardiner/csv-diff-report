@@ -135,7 +135,7 @@ class CSVDiff
             body << '<table>'
             body << '<thead><tr>'
             all_fields.each do |fld|
-                body << "<th>#{fld.is_a?(Symbol) ? fld.to_s.titleize : fld}</th>"
+                body << "<th>#{fld.is_a?(Symbol) ? titleize(fld) : fld}</th>"
             end
             body << '</tr></thead>'
             body << '<tbody>'
