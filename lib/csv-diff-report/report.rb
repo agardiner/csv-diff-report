@@ -49,7 +49,7 @@ class CSVDiff
                     @left = Pathname.new(diff.left.path)
                     @right = Pathname.new(diff.right.path)
                 end
-                diff.diff_warnings.each{ |warn| echo warn, :yellow }
+                diff.diff_warnings.each{ |warn| echo [warn, :yellow] }
                 out = []
                 out << ["Found #{diff.diffs.size} differences"]
                 diff.summary.each_with_index.map do |pair, i|
@@ -160,16 +160,16 @@ class CSVDiff
                     if matches.size > 0
                         matched_fts.concat(matches)
                     else
-                        echo "No file type matching '#{ft}' defined in .csvdiff", :yellow
-                        echo "Known file types are: #{opt_file[:file_types].keys.join(', ')}", :yellow
+                        echo ["No file type matching '#{ft}' defined in .csvdiff", :yellow]
+                        echo ["Known file types are: #{opt_file[:file_types].keys.join(', ')}", :yellow]
                     end
                 end
             else
                 if opt_file
-                    echo "No file types are defined in .csvdiff", :yellow
+                    echo ["No file types are defined in .csvdiff", :yellow]
                 else
-                    echo "The file_types option can only be used when a " +
-                        ".csvdiff is present in the LEFT or current directory", :yellow
+                    echo ["The file_types option can only be used when a " +
+                        ".csvdiff is present in the LEFT or current directory", :yellow]
                 end
             end
             matched_fts.uniq
@@ -191,8 +191,8 @@ class CSVDiff
                 if right_file.file?
                     diff_file(file, right_file.to_s, options, opt_file)
                 else
-                    echo "Skipping file '#{File.basename(file)}', as there is " +
-                        "no corresponding TO file", :yellow
+                    echo ["Skipping file '#{File.basename(file)}', as there is " +
+                        "no corresponding TO file", :yellow]
                 end
             end
         end
@@ -221,8 +221,8 @@ class CSVDiff
             settings = opt_file && opt_file[:defaults] || {}
             opt_file && opt_file[:file_types] && opt_file[:file_types].each do |file_type, hsh|
                 unless hsh[:pattern]
-                    echo "Invalid setting for file_type #{file_type} in .csvdiff; " +
-                        "missing a 'pattern' key to use to match files", :yellow
+                    echo ["Invalid setting for file_type #{file_type} in .csvdiff; " +
+                        "missing a 'pattern' key to use to match files", :yellow]
                     hsh[:pattern] = '-'
                 end
                 next if hsh[:pattern] == '-'
@@ -249,7 +249,7 @@ class CSVDiff
             csv_src = CSVDiff::CSVSource.new(src.to_s, options)
             out << ["  #{csv_src.lines.size} lines read", :white]
             echo(*out)
-            csv_src.warnings.each{ |warn| echo warn, :yellow }
+            csv_src.warnings.each{ |warn| echo [warn, :yellow] }
             csv_src
         end
 
