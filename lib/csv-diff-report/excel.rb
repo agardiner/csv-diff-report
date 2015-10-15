@@ -50,11 +50,11 @@ class CSVDiff
             xl.workbook.add_worksheet(name: 'Summary') do |sheet|
                 sheet.add_row do |row|
                     row.add_cell 'From:', :style => @xl_styles['Title']
-                    row.add_cell @diffs.size > 1 ? File.dirname(compare_from) : compare_from
+                    row.add_cell compare_from
                 end
                 sheet.add_row do |row|
                     row.add_cell 'To:', :style => @xl_styles['Title']
-                    row.add_cell @diffs.size > 1 ? File.dirname(compare_to) : compare_to
+                    row.add_cell compare_to
                 end
                 sheet.add_row
                 sheet.add_row ['Sheet', 'Adds', 'Deletes', 'Updates', 'Moves'], :style => @xl_styles['Title']

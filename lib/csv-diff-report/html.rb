@@ -69,13 +69,8 @@ class CSVDiff
             body << '<p>Source Locations:</p>'
             body << '<table>'
             body << '<tbody>'
-            if @diffs.size > 1
-                body << "<tr><th>From:</th><td>#{File.dirname(@left)}</td></tr>"
-                body << "<tr><th>To:</th><td>#{File.dirname(@right)}</td></tr>"
-            else
-                body << "<tr><th>From:</th><td>#{@left}</td></tr>"
-                body << "<tr><th>To:</th><td>#{@right}</td></tr>"
-            end
+            body << "<tr><th>From:</th><td>#{@left}</td></tr>"
+            body << "<tr><th>To:</th><td>#{@right}</td></tr>"
             body << '</tbody>'
             body << '</table>'
             body << '<br>'
