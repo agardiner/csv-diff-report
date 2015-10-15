@@ -45,6 +45,7 @@ class CSVDiff
         keyword_arg :encoding, 'The encoding to use when opening the CSV files',
             short_key: 'e'
         flag_arg :tab_delimited, 'If true, the file is assumed to be tab-delimited rather than comma-delimited'
+        flag_arg :diff_common_fields_only, 'If true, only fields in both files are compared'
         flag_arg :ignore_header, 'If true, the first line in each source file is ignored; ' +
             'requires the use of the --field-names option to name the fields'
         flag_arg :ignore_case, 'If true, field comparisons are performed without regard to case'
