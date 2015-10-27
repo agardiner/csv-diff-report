@@ -1,5 +1,6 @@
 require 'csv-diff-report/excel'
 require 'csv-diff-report/html'
+require 'csv-diff-report/text'
 
 
 class CSVDiff
@@ -12,6 +13,7 @@ class CSVDiff
 
         include Excel
         include Html
+        include Text
 
 
         # Instantiate a new diff report object. Takes an optional block callback
@@ -115,6 +117,8 @@ class CSVDiff
                 xl_output(path)
             when format.to_s =~ /^html$/i || File.extname(path) =~ /html$/i
                 html_output(path)
+            when format.to_s =~ /^te?xt$/i || File.extname(path) =~ /txt$/i
+                text_output(path)
             else
                 raise ArgumentError, "Unrecognised output format: #{format}"
             end

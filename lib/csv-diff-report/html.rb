@@ -6,7 +6,7 @@ class CSVDiff
 
         private
 
-        # Generare a diff report in XLSX format.
+        # Generare a diff report in HTML format.
         def html_output(output)
             content = []
             content << '<html>'
@@ -25,7 +25,7 @@ class CSVDiff
             content << '</body>'
             content << '</html>'
 
-            # Save workbook
+            # Save page
             path = "#{File.dirname(output)}/#{File.basename(output, File.extname(output))}.html"
             File.open(path, 'w'){ |f| f.write(content.join("\n")) }
             path

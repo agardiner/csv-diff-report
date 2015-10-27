@@ -65,7 +65,7 @@ class CSVDiff
 
         usage_break 'Output Options'
         keyword_arg :format, 'The format in which to produce the diff report',
-            default: 'HTML', validation: /^(html|xls(x)?)$/i
+            default: 'HTML', validation: /^(html|xlsx?|te?xt)$/i
         keyword_arg :output, 'The path to save the diff report to. If not specified, the diff ' +
             'report will be placed in the same directory as the FROM file, and will be named ' +
             'Diff_<FROM>_to_<TO>.<FORMAT>'
