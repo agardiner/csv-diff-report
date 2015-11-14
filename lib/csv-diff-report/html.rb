@@ -1,3 +1,5 @@
+require 'cgi'
+
 
 class CSVDiff
 
@@ -156,9 +158,9 @@ class CSVDiff
                         style = chg.downcase if i == 1
                     end
                     body << '<td>'
-                    body << "<span class='delete'>#{old}</span>" if old
+                    body << "<span class='delete'>#{CGI.escapeHTML(old.to_s)}</span>" if old
                     body << '<br>' if old && old.to_s.length > 10
-                    body << "<span#{style ? " class='#{style}'" : ''}>#{new}</span>"
+                    body << "<span#{style ? " class='#{style}'" : ''}>#{CGI.escapeHTML(new.to_s)}</span>"
                     body << '</td>'
                 end
                 body << '</tr>'
