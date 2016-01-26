@@ -21,7 +21,7 @@ class CSVDiff
         end
 
 
-        def text_diff(body, file_diff)
+        def text_diff(csv, file_diff)
             count = 0
 
             all_fields = [:row, :action]
