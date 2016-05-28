@@ -117,7 +117,7 @@ class CSVDiff
                 xl_output(path)
             when format.to_s =~ /^html$/i || File.extname(path) =~ /html$/i
                 html_output(path)
-            when format.to_s =~ /^te?xt$/i || File.extname(path) =~ /txt$/i
+            when format.to_s =~ /^(te?xt|csv)$/i || File.extname(path) =~ /(csv|txt)$/i
                 text_output(path)
             else
                 raise ArgumentError, "Unrecognised output format: #{format}"
@@ -209,7 +209,10 @@ class CSVDiff
         # @param options [Hash] The options to be passed to CSVDiff.
         def diff_file(left, right, options, opt_file)
             settings = find_file_type_settings(left, opt_file)
-            return if settings[:ignore]
+            if settings[:ignore]
+                echo "Ignoring file #{left}"
+                return
+            end
             options = settings.merge(options)
             from = open_source(left, :from, options)
             to = open_source(right, :to, options)

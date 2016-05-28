@@ -11,7 +11,7 @@ class CSVDiff
 
         # Generare a diff report in TEXT format.
         def text_output(output)
-            path = "#{File.dirname(output)}/#{File.basename(output, File.extname(output))}.diff"
+            path = "#{File.dirname(output)}/#{File.basename(output, File.extname(output))}.csv"
             CSV.open(path, 'w') do |csv|
                 @diffs.each do |file_diff|
                     text_diff(csv, file_diff) if file_diff.diffs.size > 0
