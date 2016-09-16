@@ -22,8 +22,6 @@ class CSVDiff
 
 
         def text_diff(csv, file_diff)
-            count = 0
-
             all_fields = [:row, :action]
             all_fields << :sibling_position unless file_diff.options[:ignore_moves]
             all_fields.concat(file_diff.diff_fields)
