@@ -11,7 +11,13 @@ class CSVDiff
         # Define an on_parse handler for field names or indexes. Splits the
         # supplied argument value on commas, and converts numbers to Fixnums.
         register_parse_handler(:parse_fields) do |val, arg, hsh|
-            val.split(',').map{ |fld| fld =~ /^\d+$/ ? fld.to_i : fld }
+            val.split(',').map{ |fld|
+                case fld
+                when /^\d+$/ then fld.to_i
+                when /^:(.+)/ then $1.intern
+                else fld
+                end
+            }
         end
         register_parse_handler(:parse_delimiter) do |val, arg, hsh|
             case val
@@ -66,6 +72,8 @@ class CSVDiff
             short_key: 'C'
         keyword_arg :ignore_fields, 'The names or indexes of any fields to be ignored during the diff.',
             short_key: 'I', on_parse: :parse_fields
+        keyword_arg :output_fields, 'The names or indexes of the fields to include in the diff output.',
+            short_key: 'O', on_parse: :parse_fields
         flag_arg :ignore_adds, "If true, items in TO that are not in FROM are ignored.",
             short_key: 'A'
         flag_arg :ignore_deletes, "If true, items in FROM that are not in TO are ignored.",

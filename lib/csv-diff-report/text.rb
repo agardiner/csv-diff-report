@@ -22,13 +22,10 @@ class CSVDiff
 
 
         def text_diff(csv, file_diff)
-            all_fields = [:row, :action]
-            all_fields << :sibling_position unless file_diff.options[:ignore_moves]
-            all_fields.concat(file_diff.diff_fields)
-
-            csv << all_fields.map{ |fld| fld.is_a?(Symbol) ? titleize(fld) : fld }
+            out_fields = output_fields(file_diff)
+            csv << out_fields.map{ |fld| fld.is_a?(Symbol) ? titleize(fld) : fld }
             file_diff.diffs.each do |key, diff|
-                row = all_fields.map do |field|
+                row = out_fields.map do |field|
                     d = diff[field]
                     d = d.last if d.is_a?(Array)
                     d

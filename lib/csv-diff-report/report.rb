@@ -260,6 +260,21 @@ class CSVDiff
             csv_src
         end
 
+
+        # Returns the fields to be output in the diff file
+        def output_fields(diff)
+            if diff.options[:output_fields]
+                diff.options[:output_fields].map do |fld|
+                    fld.is_a?(Fixnum) ? diff.diff_fields[fld] : fld
+                end
+            else
+                out_fields = [:row, :action]
+                out_fields << :sibling_position unless diff.options[:ignore_moves]
+                out_fields.concat(diff.diff_fields)
+                out_fields
+            end
+        end
+
     end
 
 end

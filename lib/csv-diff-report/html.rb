@@ -126,12 +126,10 @@ class CSVDiff
             end
             body << '</p>'
 
-            all_fields = [:row, :action]
-            all_fields << :sibling_position unless file_diff.options[:ignore_moves]
-            all_fields.concat(file_diff.diff_fields)
+            out_fields = output_fields(file_diff)
             body << '<table>'
             body << '<thead><tr>'
-            all_fields.each do |fld|
+            out_fields.each do |fld|
                 body << "<th>#{fld.is_a?(Symbol) ? titleize(fld) : fld}</th>"
             end
             body << '</tr></thead>'
@@ -139,7 +137,7 @@ class CSVDiff
             file_diff.diffs.sort_by{|k, v| v[:row] }.each do |key, diff|
                 body << '<tr>'
                 chg = diff[:action]
-                all_fields.each_with_index do |field, i|
+                out_fields.each_with_index do |field, i|
                     old = nil
                     style = case chg
                     when 'Add', 'Delete' then chg.downcase
