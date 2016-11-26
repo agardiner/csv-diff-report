@@ -101,7 +101,9 @@ class CSVDiff
                     diff_dir(@left, @right, options, opt_file)
                 end
             else
-                raise ArgumentError, "Left and right must both exist and be files or directories"
+                echo ["From path '#{@left}' not found", :red] unless @left.exist?
+                echo ["To path '#{@right}' not found", :red] unless @right.exist?
+                raise ArgumentError, "Left and right must both exist and be of the same type (files or directories)"
             end
         end
 
