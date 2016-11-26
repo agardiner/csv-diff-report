@@ -37,6 +37,7 @@ class CSVDiff
                 @xl_styles['Update'] = s.add_style :fg_color => '0000A0', :bg_color => 'F0F0FF'
                 @xl_styles['Move'] = s.add_style :fg_color => '4040FF'
                 @xl_styles['Delete'] = s.add_style :fg_color => 'FF0000', :strike => true
+                @xl_styles['Matched'] = s.add_style :fg_coler => 'A0A0A0'
             end
             xl
         end
@@ -106,9 +107,12 @@ class CSVDiff
                                     style = @xl_styles[chg]
                                     comment = old
                                 end
-                            else
+                            elsif d
                                 new = d
                                 style = @xl_styles[chg] if i == 1
+                            elsif file_diff.options[:include_matched]
+                                style = @xl_styles['Matched']
+                                d = file_diff.right[key] && file_diff.right[key][field]
                             end
                             case new
                             when String

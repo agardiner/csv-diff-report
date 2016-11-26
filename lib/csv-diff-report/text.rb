@@ -28,6 +28,9 @@ class CSVDiff
                 row = out_fields.map do |field|
                     d = diff[field]
                     d = d.last if d.is_a?(Array)
+                    if d.nil? && file_diff.options[:include_matched]
+                        d = file_diff.right[key] && file_diff.right[key][field]
+                    end
                     d
                 end
                 csv << row

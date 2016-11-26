@@ -55,6 +55,7 @@ class CSVDiff
                     .delete {background-color: white; color: #FF0000; text-decoration: line-through;}
                     .update {background-color: white; color: #0000A0;}
                     .move {background-color: white; color: #0000A0;}
+                    .matched {background-color: white; color: #A0A0A0;}
                     .bold {font-weight: bold;}
                     .center {text-align: center;}
                     .right {text-align: right;}
@@ -138,7 +139,7 @@ class CSVDiff
                 body << '<tr>'
                 chg = diff[:action]
                 out_fields.each_with_index do |field, i|
-                    old = nil
+                    old, new = nil, nil
                     style = case chg
                     when 'Add', 'Delete' then chg.downcase
                     end
@@ -151,9 +152,12 @@ class CSVDiff
                         else
                             style = chg.downcase
                         end
-                    else
+                    elsif d
                         new = d
                         style = chg.downcase if i == 1
+                    elsif file_diff.options[:include_matched]
+                        style = 'matched'
+                        d = file_diff.right[key] && file_diff.right[key][field]
                     end
                     body << '<td>'
                     body << "<span class='delete'>#{CGI.escapeHTML(old.to_s)}</span>" if old

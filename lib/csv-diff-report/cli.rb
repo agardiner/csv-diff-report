@@ -72,8 +72,6 @@ class CSVDiff
             short_key: 'C'
         keyword_arg :ignore_fields, 'The names or indexes of any fields to be ignored during the diff.',
             short_key: 'I', on_parse: :parse_fields
-        keyword_arg :output_fields, 'The names or indexes of the fields to include in the diff output.',
-            short_key: 'O', on_parse: :parse_fields
         flag_arg :ignore_adds, "If true, items in TO that are not in FROM are ignored.",
             short_key: 'A'
         flag_arg :ignore_deletes, "If true, items in FROM that are not in TO are ignored.",
@@ -88,7 +86,12 @@ class CSVDiff
             default: 'HTML', validation: /^(html|xlsx?|te?xt|csv)$/i
         keyword_arg :output, 'The path to save the diff report to. If not specified, the diff ' +
             'report will be placed in the same directory as the FROM file, and will be named ' +
-            'Diff_<FROM>_to_<TO>.<FORMAT>'
+            'Diff_<FROM>_to_<TO>.<FORMAT>',
+            short_key: 'o'
+        keyword_arg :output_fields, 'The names or indexes of the fields to include in the diff output.',
+            short_key: 'O', on_parse: :parse_fields
+        keyword_arg :include_matched, 'If true, fields that match on lines with differences are included ' +
+            'in the diff output; by default, matching fields are not included in the diff output.'
 
 
         # Parses command-line options, and then performs the diff.
