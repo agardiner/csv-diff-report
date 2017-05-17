@@ -175,7 +175,7 @@ class CSVDiff
                     echo ["No file types are defined in .csvdiff", :yellow]
                 else
                     echo ["The file_types option can only be used when a " +
-                        ".csvdiff is present in the LEFT or current directory", :yellow]
+                        ".csvdiff is present in the FROM or current directory", :yellow]
                 end
             end
             matched_fts.uniq
@@ -185,7 +185,7 @@ class CSVDiff
         # Diff files that exist in both +left+ and +right+ directories.
         def diff_dir(left, right, options, opt_file)
             pattern = Pathname(options[:pattern] || '*')
-            exclude = options[:exclude]
+            exclude = options[:exclude_pattern]
 
             echo "  Include Pattern: #{pattern}"
             echo "  Exclude Pattern: #{exclude}" if exclude
@@ -237,11 +237,13 @@ class CSVDiff
                 next if hsh[:pattern] == '-'
                 unless hsh[:matched_files]
                     hsh[:matched_files] = Dir[(left.dirname + hsh[:pattern]).to_s.gsub('\\', '/')]
-                    hsh[:matched_files] -= Dir[(left.dirname + hsh[:exclude]).to_s.gsub('\\', '/')] if hsh[:exclude]
+                    if hsh[:exclude_pattern]
+                        hsh[:matched_files] -= Dir[(left.dirname + hsh[:exclude_pattern]).to_s.gsub('\\', '/')]
+                    end
                 end
                 if hsh[:matched_files].include?(left.to_s)
                     settings.merge!(hsh)
-                    [:pattern, :exclude, :matched_files].each{ |k| settings.delete(k) }
+                    [:pattern, :exclude_pattern, :matched_files].each{ |k| settings.delete(k) }
                     break
                 end
             end
@@ -257,6 +259,9 @@ class CSVDiff
             out = ["Opening #{left_right.to_s.upcase} file '#{File.basename(src)}'..."]
             csv_src = CSVDiff::CSVSource.new(src.to_s, options)
             out << ["  #{csv_src.lines.size} lines read", :white]
+            if csv_src.skip_count > 0
+                out << [" (#{csv_src.skip_count} lines skipped)", :yellow]
+            end
             echo(*out)
             csv_src.warnings.each{ |warn| echo [warn, :yellow] }
             csv_src
