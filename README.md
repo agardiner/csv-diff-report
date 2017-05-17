@@ -87,6 +87,54 @@ Output Options
 
 ```
 
+
+## .csvdiff Files
+
+The csvdiff command-line tool supports both file and directory diffs. As
+directories may contain files of different formats, .csvdiff files can be
+used to match file names to file types, and specify the appropriate diff
+settings for each file type.
+
+A .csvdiff file can be placed in either the working directory from which the
+csvdiff command is run, or the FROM directory. It consists of a YAML-formatted
+file with the following top-level keys:
+
+- defaults: Contains settings to be applied across all file types unless
+  overridden for a specific file type.
+- file_types: A hash whose keys are the file type labels used to describe
+  files of that type, and whose values are the various diff settings to use
+  for that file type.
+
+### .csvdiff Settings
+
+All settings that can be specified on the command-line can also be specified via
+.csvdiff for each file type. In addition, several additional settings are
+available via .csvdiff that are not available on the command-line. These
+additional settings are as follows:
+
+- pattern: Specifies the file name pattern that is used to match a file name to
+  a file type. File types are checked in the order listed, so more general
+  patterns must appear later in the .csvdiff file to avoid masking more specific
+  patterns; e.g. a pattern of * will match every file, so it should appear as
+  the pattern setting of the last entry in the file_types hash to ensure other
+  more specific patterns get a chance to match a given file name first.
+- exclude_pattern: Specifies an exclusion pattern for file names. Can be useful
+  when a single pattern is correct for a file-type but for a class of exceptions.
+- ignore: A boolean flag that can be used to ignore processing of matching files.
+  Useful when a directory contains files that should not be diffed in addition to
+  those that should.
+- include: A Hash of field names or indexes to either a regular expression or a
+  lambda expression which must be satisfied for records in the source to be diffed.
+  Any records with values in the corresponding columns will not be included in the
+  diff if the value in that column does not satisfy the regular expression or
+  lambda.
+- exclude: A Hash of field names or indexes to either a regular expression or a
+  lambda expression which must *not* be satisfied for records in the source to be
+  diffed. Any records with values in the corresponding columns will not be included
+  in the diff if the value in that column satisfies the regular expression or
+  lambda.
+
+
 ## Unique Row Identifiers
 
 CSVDiff is preferable over a standard line-by-line diff when row order is
@@ -143,6 +191,7 @@ B below Root.
 
 Note: If you aren't interested in changes in the order of siblings, then you could use
 CSVDiff with a :key_field option of column 1, and specify the :ignore_moves option.
+
 
 ## Warnings
 
@@ -251,6 +300,23 @@ from the diff process using the :ignore_fields option:
 ```ruby
 diff = CSVDiff.new(file1, file2, parent_field: 'Date', child_fields: ['HomeTeam', 'AwayTeam'],
                    ignore_fields: ['CreatedAt', 'UpdatedAt'])
+```
+
+### Filtering Rows
+
+If you need to filter source data before running the diff process, you can use the :include
+and :exclude options to do so. Both options take a Hash as their value; the hash should have
+keys that are the field names or indexes (0-based) on which to filter, and whose values are
+regular expressions or lambdas to be applied to values of the corresponding field. Rows will
+only be diffed if they satisfy :include conditions, and do not satisfy :exclude conditions.
+```ruby
+# Generate a diff of Arsenal home games not refereed by Clattenburg
+diff = CSVDiff.new(file1, file2, parent_field: 'Date', child_fields: ['HomeTeam', 'AwayTeam'],
+                   include: {HomeTeam: 'Arsenal'}, exclude: {Referee: /Clattenburg/})
+
+# Generate a diff of games played over the Xmas/New Year period
+diff = CSVDiff.new(file1, file2, parent_field: 'Date', child_fields: ['HomeTeam', 'AwayTeam'],
+                   include: {Date: lambda{ |d| holiday_period.include?(Date.strptime(d, '%y/%m/%d')) } })
 ```
 
 ### Ignoring Certain Changes
