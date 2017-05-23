@@ -242,7 +242,8 @@ class CSVDiff
                     end
                 end
                 if hsh[:matched_files].include?(left.to_s)
-                    settings.merge!(hsh)
+                    echo "Matched file #{left} to file type #{file_type}"
+                    settings = settings.merge(hsh)
                     [:pattern, :exclude_pattern, :matched_files].each{ |k| settings.delete(k) }
                     break
                 end
@@ -257,14 +258,20 @@ class CSVDiff
         # @param options [Hash] An options hash to be passed to CSVSource.
         def open_source(src, left_right, options)
             out = ["Opening #{left_right.to_s.upcase} file '#{File.basename(src)}'..."]
-            csv_src = CSVDiff::CSVSource.new(src.to_s, options)
-            out << ["  #{csv_src.lines.size} lines read", :white]
-            if csv_src.skip_count > 0
-                out << [" (#{csv_src.skip_count} lines skipped)", :yellow]
+            begin
+                csv_src = CSVDiff::CSVSource.new(src.to_s, options)
+                out << ["  #{csv_src.lines.size} lines read", :white]
+                if csv_src.skip_count > 0
+                    out << [" (#{csv_src.skip_count} lines skipped)", :yellow]
+                end
+                echo(*out)
+                csv_src.warnings.each{ |warn| echo [warn, :yellow] }
+                csv_src
+            rescue Object => ex
+                echo(*out)
+                echo(["An error occurred opening file #{src}: #{ex}", :red])
+                raise
             end
-            echo(*out)
-            csv_src.warnings.each{ |warn| echo [warn, :yellow] }
-            csv_src
         end
 
 
