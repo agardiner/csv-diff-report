@@ -1,6 +1,6 @@
 GEMSPEC = Gem::Specification.new do |s|
     s.name = "csv-diff-report"
-    s.version = "0.3.4"
+    s.version = "0.3.5"
     s.authors = ["Adam Gardiner"]
     s.date = "2017-05-17"
     s.summary = "CSV Diff Report is a library for generating diff reports using the CSV Diff gem"
@@ -29,7 +29,7 @@ GEMSPEC = Gem::Specification.new do |s|
     s.add_runtime_dependency 'csv-diff', '>= 0.3.3'
     s.add_runtime_dependency 'arg-parser', '>= 0.2'
     s.add_runtime_dependency 'color-console', '>= 0.1'
-    s.add_runtime_dependency 'axlsx', '~> 1.3'
+    s.add_runtime_dependency 'axlsx', '>= 1.3'
     s.bindir = 'bin'
     s.executables << 'csvdiff'
 end
