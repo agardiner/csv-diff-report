@@ -43,7 +43,7 @@ class CSVDiff
             'Requires the presence of a .csvdiff file in the FROM or current directory to define ' +
             'the file type patterns.',
             short_key: 't', on_parse: :split_to_array
-        keyword_arg :exclude, 'A file name pattern of files to exclude from the diff if a directory ' +
+        keyword_arg :exclude_pattern, 'A file name pattern of files to exclude from the diff if a directory ' +
             'diff is being performed.',
             short_key: 'x'
         keyword_arg :field_names, 'A comma-separated list of field names for each field in the source files.' +
