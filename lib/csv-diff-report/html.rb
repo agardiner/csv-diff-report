@@ -14,7 +14,7 @@ class CSVDiff
             content << '<html>'
             content << '<head>'
             content << '<title>Diff Report</title>'
-            content << '<meta http-equiv="Content-Type" content="text/html; charset=us-ascii">'
+            content << '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
             content << html_styles
             content << '</head>'
             content << '<body>'
