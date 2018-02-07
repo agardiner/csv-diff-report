@@ -160,7 +160,7 @@ class CSVDiff
                         style = chg.downcase if i == 1
                     elsif file_diff.options[:include_matched]
                         style = 'matched'
-                        d = file_diff.right[key] && file_diff.right[key][field]
+                        new = file_diff.right[key] && file_diff.right[key][field]
                     end
                     body << '<td>'
                     body << "<span class='delete'>#{CGI.escapeHTML(old.to_s)}</span>" if old
