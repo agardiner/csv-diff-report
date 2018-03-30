@@ -67,6 +67,8 @@ class CSVDiff
             short_key: 'i'
 
         usage_break 'Diff Options:'
+        keyword_arg :options_file, 'Path to an options file that contains settings based on file types. ' +
+            'Defaults to searching for a file named .csvdiff in the FROM or current directory.'
         flag_arg :ignore_case, 'If true, field comparisons are performed without regard to case.'
         flag_arg :diff_common_fields_only, 'If true, only fields in both files are compared.',
             short_key: 'C'

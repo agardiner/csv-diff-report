@@ -83,13 +83,13 @@ class CSVDiff
                 echo "Performing file diff:"
                 echo "  From File:    #{@left}"
                 echo "  To File:      #{@right}"
-                opt_file = load_opt_file(@left.dirname)
+                opt_file = load_opt_file(options.fetch(:options_file, @left.dirname))
                 diff_file(@left.to_s, @right.to_s, options, opt_file)
             elsif @left.directory? && @right.directory?
                 echo "Performing directory diff:"
                 echo "  From directory:  #{@left}"
                 echo "  To directory:    #{@right}"
-                opt_file = load_opt_file(@left)
+                opt_file = load_opt_file(options.fetch(:options_file, @left))
                 if fts = options[:file_types]
                     file_types = find_matching_file_types(fts, opt_file)
                     file_types.each do |file_type|
@@ -133,7 +133,8 @@ class CSVDiff
 
         # Loads an options file from +dir+
         def load_opt_file(dir)
-            opt_path = Pathname(dir + '.csvdiff')
+            opt_path = Pathname(dir)
+            opt_path += '.csvdiff' if opt_path.directory?
             opt_path = Pathname('.csvdiff') unless opt_path.exist?
             if opt_path.exist?
                 echo "Loading options from '#{opt_path}'"
