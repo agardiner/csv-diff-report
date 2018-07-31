@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.4.1 - 2018-07-31]
+
+### Fixed
+
+  * Corrected syntax error and logic for handling absence of diff-lcs gem
+  * Added fallback font-family entries for non-Windows machines
+
+
 ## [0.4 - 2018-07-31]
 
 ### Fixed
