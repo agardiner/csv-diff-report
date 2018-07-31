@@ -1,4 +1,5 @@
 require 'cgi'
+require 'lcs-diff' rescue nil
 
 
 class CSVDiff
@@ -18,6 +19,8 @@ class CSVDiff
             content << html_styles
             content << '</head>'
             content << '<body>'
+
+            @lcs_available = !!defined?(Diff::LCS)
 
             html_summary(content)
             @diffs.each do |file_diff|
@@ -45,6 +48,7 @@ class CSVDiff
                     h3 {font-family: Calibri; font-size: 12pt; margin: 1em 0em .2em;}
                     body {font-family: Calibri; font-size: 11pt;}
                     p {margin: .2em 0em;}
+                    code {font-size: 8pt; white-space: pre;}
                     table {font-family: Calibri; font-size: 10pt; line-height: 12pt; border-collapse: collapse;}
                     th {background-color: #00205B; color: white; font-size: 11pt; font-weight: bold; text-align: left;
                         border: 1px solid #DDDDFF; padding: 1px 5px;}
@@ -69,7 +73,9 @@ class CSVDiff
         def html_summary(body)
             body << '<h2>Summary</h2>'
 
-            body << '<p>Source Locations:</p>'
+            body << "<p>Diff report generated at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}.</p>"
+
+            body << '<h3>Source Locations</h3>'
             body << '<table>'
             body << '<tbody>'
             body << "<tr><th>From:</th><td>#{@left}</td></tr>"
@@ -77,7 +83,7 @@ class CSVDiff
             body << '</tbody>'
             body << '</table>'
             body << '<br>'
-            body << '<p>Files:</p>'
+            body << '<h3>Files</hs>'
             body << '<table>'
             body << '<thead>'
             body << "<tr><th rowspan=2>File</th><th colspan=2 class='center'>Lines</th><th colspan=4 class='center'>Diffs</th></tr>"
@@ -163,9 +169,22 @@ class CSVDiff
                         new = file_diff.right[key] && file_diff.right[key][field]
                     end
                     body << '<td>'
-                    body << "<span class='delete'>#{CGI.escapeHTML(old.to_s)}</span>" if old
-                    body << '<br>' if old && old.to_s.length > 10
-                    body << "<span#{style ? " class='#{style}'" : ''}>#{CGI.escapeHTML(new.to_s)}</span>"
+                    if style == 'update' && @lcs_available && old && new && (old.to_s.lines.count > 1 || new.to_s.lines.count > 1)
+                        body << '<code>'
+                        Diff::LCS.diff(old.lines, new.lines).each_with_index |chg_set, j|
+                            body << '...' unless j == 0
+                            chg_set.each do |lcs_diff|
+                                body << "#{lcs_diff.position}&nbsp;&nbsp;<span class='#{
+                                    lcs_diff.action == '+' ? 'add' : 'delete'}'>#{
+                                    CGI.escapeHTML(lcs_diff.element.to_s.chomp)}</span>"
+                            end
+                        end
+                        body << '</code>'
+                    else
+                        body << "<span class='delete'>#{CGI.escapeHTML(old.to_s)}</span>" if old
+                        body << '<br>' if old && old.to_s.length > 10
+                        body << "<span#{style ? " class='#{style}'" : ''}>#{CGI.escapeHTML(new.to_s)}</span>"
+                    end
                     body << '</td>'
                 end
                 body << '</tr>'
