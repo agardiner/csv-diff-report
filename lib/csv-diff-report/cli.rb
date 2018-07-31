@@ -92,7 +92,7 @@ class CSVDiff
             short_key: 'o'
         keyword_arg :output_fields, 'The names or indexes of the fields to include in the diff output.',
             short_key: 'O', on_parse: :parse_fields
-        keyword_arg :include_matched, 'If true, fields that match on lines with differences are included ' +
+        flag_arg :include_matched, 'If true, fields that match on lines with differences are included ' +
             'in the diff output; by default, matching fields are not included in the diff output.'
 
 
