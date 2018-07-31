@@ -44,15 +44,15 @@ class CSVDiff
         def html_styles
             style = <<-EOT
                 <style>
-                    @font-face {font-family: Calibri;}
+                    @font-face {font-family: Calibri, Helvetica, sans-serif;}
 
-                    h1 {font-family: Calibri; font-size: 16pt;}
-                    h2 {font-family: Calibri; font-size: 14pt; margin: 1em 0em .2em;}
-                    h3 {font-family: Calibri; font-size: 12pt; margin: 1em 0em .2em;}
-                    body {font-family: Calibri; font-size: 11pt;}
+                    h1 {font-family: Calibri, Helvetica, sans-serif; font-size: 16pt;}
+                    h2 {font-family: Calibri, Helvetica, sans-serif; font-size: 14pt; margin: 1em 0em .2em;}
+                    h3 {font-family: Calibri, Helvetica, sans-serif; font-size: 12pt; margin: 1em 0em .2em;}
+                    body {font-family: Calibri, Helvetica, sans-serif; font-size: 11pt;}
                     p {margin: .2em 0em;}
                     code {font-size: 8pt; white-space: pre;}
-                    table {font-family: Calibri; font-size: 10pt; line-height: 12pt; border-collapse: collapse;}
+                    table {font-family: Calibri, Helvetica, sans-serif; font-size: 10pt; line-height: 12pt; border-collapse: collapse;}
                     th {background-color: #00205B; color: white; font-size: 11pt; font-weight: bold; text-align: left;
                         border: 1px solid #DDDDFF; padding: 1px 5px;}
                     td {border: 1px solid #DDDDFF; padding: 1px 5px;}
