@@ -174,7 +174,7 @@ class CSVDiff
                     body << '<td>'
                     if style == 'update' && @lcs_available && old && new && (old.to_s.lines.count > 1 || new.to_s.lines.count > 1)
                         body << '<code>'
-                        Diff::LCS.diff(old.lines, new.lines).each_with_index do |chg_set, j|
+                        Diff::LCS.diff(old.to_s.lines, new.to_s.lines).each_with_index do |chg_set, j|
                             body << '...' unless j == 0
                             chg_set.each do |lcs_diff|
                                 body << "#{lcs_diff.position}&nbsp;&nbsp;<span class='#{
