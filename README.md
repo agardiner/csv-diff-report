@@ -37,7 +37,7 @@ csvdiff <file1> <file2>
 The `csvdiff` command-line tool provides many options to control behaviour of
 the diff and reporting process. To see all available options, run:
 ```
-csv-diff --help
+csvdiff --help
 ```
 
 This will display a help screen like the following:
