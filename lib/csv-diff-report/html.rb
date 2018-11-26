@@ -86,7 +86,7 @@ class CSVDiff
             body << '</tbody>'
             body << '</table>'
             body << '<br>'
-            body << '<h3>Files</hs>'
+            body << '<h3>Files</h3>'
             body << '<table>'
             body << '<thead>'
             body << "<tr><th rowspan=2>File</th><th colspan=2 class='center'>Lines</th><th colspan=4 class='center'>Diffs</th></tr>"
