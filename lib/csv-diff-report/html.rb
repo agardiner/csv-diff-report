@@ -94,7 +94,7 @@ class CSVDiff
             body << '</thead>'
             body << '<tbody>'
             @diffs.each do |file_diff|
-                label = File.basename(file_diff.left.path)
+                label = File.basename((file_diff.left || file_diff.right).path)
                 body << '<tr>'
                 if file_diff.diffs.size > 0
                     body << "<td><a href='##{label}'>#{label}</a></td>"
