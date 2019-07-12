@@ -20,6 +20,8 @@ class CSVDiff
         attr_accessor :left, :right
         # Controls whether output should be in color or not
         attr_accessor :color
+        # Accessor for each file diff in this report
+        attr_reader :diffs
 
 
         # Instantiate a new diff report object. Takes an optional block callback
@@ -43,22 +45,16 @@ class CSVDiff
 
 
         def echo(*args)
-            if @color
-                if @echo_handler
-                    @echo_handler.call(*args)
-                else
-                    args.each do |out|
-                        Console.write(*out)
-                    end
-                    Console.puts
-                end
+            unless @color
+                args = args.map{ |chunk| chunk.is_a?(String) ? chunk : chunk.first }.join()
+            end
+            if @echo_handler
+                @echo_handler.call(*args)
             else
-                txt = args.map{ |chunk| chunk.is_a?(String) ? chunk : chunk.first }.join()
-                if @echo_handler
-                    @echo_handler.call(txt)
-                else
-                    Console.put txt
+                args.each do |out|
+                    Console.write(*out)
                 end
+                Console.puts
             end
         end
 
