@@ -94,7 +94,7 @@ class CSVDiff
             body << '</thead>'
             body << '<tbody>'
             @diffs.each do |file_diff|
-                label = File.basename((file_diff.left || file_diff.right).path)
+                label = File.basename(file_diff.left.path? ? file_diff.left.path : file_diff.right.path)
                 body << '<tr>'
                 if file_diff.diffs.size > 0
                     body << "<td><a href='##{label}'>#{label}</a></td>"
@@ -115,7 +115,7 @@ class CSVDiff
 
 
         def html_diff(body, file_diff)
-            label = File.basename(file_diff.left.path)
+            label = File.basename(file_diff.left.path? ? file_diff.left.path : file_diff.right.path)
             body << "<h2 id=#{label}>#{label}</h2>"
             body << '<p>'
             count = 0
