@@ -52,7 +52,7 @@ class CSVDiff
                     body {font-family: Calibri, Helvetica, sans-serif; font-size: 11pt;}
                     p {margin: .2em 0em;}
                     code {font-size: 8pt; white-space: pre;}
-                    table {font-family: Calibri, Helvetica, sans-serif; font-size: 10pt; line-height: 12pt; border-collapse: collapse;}
+                    table {font-family: Calibri, Helvetica, sans-serif; font-size: 10pt; line-height: 13pt; border-collapse: collapse;}
                     th {background-color: #00205B; color: white; font-size: 11pt; font-weight: bold; text-align: left;
                         border: 1px solid #DDDDFF; padding: 1px 5px;}
                     td {border: 1px solid #DDDDFF; padding: 1px 5px;}
@@ -173,20 +173,18 @@ class CSVDiff
                     end
                     body << '<td>'
                     if style == 'update' && @lcs_available && old && new && (old.to_s.lines.count > 1 || new.to_s.lines.count > 1)
-                        body << '<code>'
                         Diff::LCS.diff(old.to_s.lines, new.to_s.lines).each_with_index do |chg_set, j|
                             body << '...' unless j == 0
                             chg_set.each do |lcs_diff|
                                 body << "#{lcs_diff.position}&nbsp;&nbsp;<span class='#{
-                                    lcs_diff.action == '+' ? 'add' : 'delete'}'>#{
-                                    CGI.escapeHTML(lcs_diff.element.to_s.chomp)}</span>"
+                                    lcs_diff.action == '+' ? 'add' : 'delete'}'><code>#{
+                                    CGI.escapeHTML(lcs_diff.element.to_s.chomp)}</code></span>"
                             end
                         end
-                        body << '</code>'
                     else
-                        body << "<span class='delete'>#{CGI.escapeHTML(old.to_s)}</span>" if old
+                        body << "<span class='delete'><code>#{CGI.escapeHTML(old.to_s)}</code></span>" if old
                         body << '<br>' if old && old.to_s.length > 10
-                        body << "<span#{style ? " class='#{style}'" : ''}>#{CGI.escapeHTML(new.to_s)}</span>"
+                        body << "<span#{style ? " class='#{style}'" : ''}><code>#{CGI.escapeHTML(new.to_s)}</code></span>"
                     end
                     body << '</td>'
                 end
