@@ -1,4 +1,4 @@
-require 'cgi'
+require 'cgi/escape'
 begin
     require 'lcs-diff'
 rescue LoadError
