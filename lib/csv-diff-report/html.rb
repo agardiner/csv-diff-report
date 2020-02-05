@@ -1,4 +1,9 @@
-require 'cgi/escape'
+if RUBY_VERSION >= "2.3.0"
+    require "cgi/escape"
+else
+    require "cgi/util"
+end
+
 begin
     require 'lcs-diff'
 rescue LoadError
