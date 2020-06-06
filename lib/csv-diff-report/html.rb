@@ -10,7 +10,6 @@ class CSVDiff
     # Defines functionality for exporting a Diff report in HTML format.
     module Html
 
-        private
 
         # Generare a diff report in HTML format.
         def html_output(output)
@@ -73,7 +72,7 @@ class CSVDiff
         end
 
 
-        def html_summary(body)
+        def html_summary(body, item_lbl='Files')
             body << '<h2>Summary</h2>'
 
             body << "<p>Diff report generated at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}.</p>"
@@ -86,7 +85,7 @@ class CSVDiff
             body << '</tbody>'
             body << '</table>'
             body << '<br>'
-            body << '<h3>Files</h3>'
+            body << "<h3>#{item_lbl)</h3>"
             body << '<table>'
             body << '<thead>'
             body << "<tr><th rowspan=2>File</th><th colspan=2 class='center'>Lines</th><th colspan=4 class='center'>Diffs</th></tr>"
