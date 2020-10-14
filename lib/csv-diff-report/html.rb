@@ -176,7 +176,7 @@ class CSVDiff
                             body << '<br>...<br>' unless j == 0
                             chg_set.each_with_index do |lcs_diff, l|
                                 body << '<br>' unless l == 0
-                                body << "#{lcs_diff.position}&nbsp;&nbsp;<span class='#{
+                                body << "#{lcs_diff.position + 1}&nbsp;&nbsp;<span class='#{
                                     lcs_diff.action == '+' ? 'add' : 'delete'}'><code>#{
                                     CGI.escapeHTML(lcs_diff.element.to_s.chomp)}</code></span>"
                             end
